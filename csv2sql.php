@@ -76,13 +76,14 @@ foreach ($dbaseInfo as $table => $fields) {
     try {
         $dataExporter = new SqlDataExporter($table, $sqlDir);
         $alias = key($dataDescr[$table]);
-        $dataImporter->import($csvDir . '\\' . $alias . '.csv', $filesInfo[$alias]);
-        $result = $dataImporter->getData();
-        foreach ($result as $value) {
-            foreach ($dataDescr[$table][$alias] as $index => $key) {
-                $fields[$index][key($fields[$index])] = $value[$key];
+        $dataImporter->prepare($csvDir . '/' . $alias . '.csv', $filesInfo[$alias]);
+        foreach ($dataImporter->getData() as $data) {
+            if ($data[0] !== null) {
+                foreach ($dataDescr[$table][$alias] as $index => $key) {
+                    $fields[$index][key($fields[$index])] = $data[$key];
+                }
+                $dataExporter->save($fields);
             }
-            $dataExporter->save($fields);
         }
     } catch (FileFormatException $e) {
         echo $e->getMessage() . \PHP_EOL;
