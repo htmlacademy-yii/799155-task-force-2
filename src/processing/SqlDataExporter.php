@@ -24,6 +24,9 @@ class SqlDataExporter
         $this->table = $table;
         $this->dir = $dir;
         $this->fileObject = null;
+        if (!is_dir($dir)) {
+            mkdir($dir);
+        }
         try {
             $this->fileObject = new \SplFileObject($this->dir . '\\' .
                 $this->table . '.sql', 'w');

@@ -1,7 +1,5 @@
 <?php
-
 /* @var $this yii\web\View */
+$this->title = 'TaskForce';
 ?>
-<div class="site-index">
-    <h1>Hello World!</h1>
-</div>
+<h1>Hello world!</h1>

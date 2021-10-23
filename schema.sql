@@ -1,6 +1,7 @@
 CREATE DATABASE TaskForce DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 USE TaskForce;
 
+DROP TABLE IF EXISTS `categories`;
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
@@ -10,6 +11,7 @@ CREATE TABLE categories (
 
 CREATE INDEX code_ind ON categories(code);
 
+DROP TABLE IF EXISTS `documents`;
 CREATE TABLE documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT NOT NULL,
@@ -18,6 +20,7 @@ CREATE TABLE documents (
 
 CREATE INDEX doc_ind ON documents(task_id);
 
+DROP TABLE IF EXISTS `images`;
 CREATE TABLE images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -26,6 +29,7 @@ CREATE TABLE images (
 
 CREATE INDEX img_ind ON images(user_id);
 
+DROP TABLE IF EXISTS `cities`;
 CREATE TABLE cities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(32) NOT NULL,
@@ -35,6 +39,7 @@ CREATE TABLE cities (
 
 CREATE INDEX city_ind ON cities(name);
 
+DROP TABLE IF EXISTS `locations`;
 CREATE TABLE locations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     city_id INT NOT NULL,
@@ -47,6 +52,7 @@ CREATE TABLE locations (
 
 CREATE INDEX loc_ind ON locations(city_id);
 
+DROP TABLE IF EXISTS `tasks`;
 CREATE TABLE tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     custom_id INT NOT NULL COMMENT 'заказчик',
@@ -64,6 +70,7 @@ CREATE TABLE tasks (
 
 CREATE INDEX task_ind ON tasks(name);
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
@@ -74,6 +81,7 @@ CREATE TABLE users (
 
 CREATE INDEX user_ind ON users(email);
 
+DROP TABLE IF EXISTS `profiles`;
 CREATE TABLE profiles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -89,6 +97,7 @@ CREATE TABLE profiles (
 
 CREATE INDEX profile_ind ON profiles(user_id);
 
+DROP TABLE IF EXISTS `replies`;
 CREATE TABLE replies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT NOT NULL,
@@ -102,6 +111,7 @@ CREATE TABLE replies (
 
 CREATE INDEX reply_ind ON replies(add_date);
 
+DROP TABLE IF EXISTS `reviews`;
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT NOT NULL,
@@ -114,6 +124,7 @@ CREATE TABLE reviews (
 
 CREATE INDEX review_ind ON reviews(add_date);
 
+DROP TABLE IF EXISTS `messages`;
 CREATE TABLE messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content VARCHAR(256) NOT NULL,
@@ -124,6 +135,7 @@ CREATE TABLE messages (
 
 CREATE INDEX msg_ind ON messages(add_date);
 
+DROP TABLE IF EXISTS `users_categories`;
 CREATE TABLE users_categories (
     user_id INT NOT NULL,
     category_id INT NOT NULL,
