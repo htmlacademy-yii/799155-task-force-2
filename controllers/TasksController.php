@@ -20,9 +20,9 @@ class TasksController extends Controller
         $categoryNames[Categories::MAIN_CATEGORIES] = ArrayHelper::map($cats, 'id', 'name');
         $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
         $categoryNames[Categories::PERIOD] = array_map(
-            function($key, $value) {
+            function ($key, $value) {
                 return $key . ' ' . $value;
-            }, 
+            },
             array_keys(TasksSelector::SELECT_PERIODS),
             array_values(TasksSelector::SELECT_PERIODS)
         );

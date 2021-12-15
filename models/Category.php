@@ -74,14 +74,4 @@ class Category extends ActiveRecord
     {
         return $this->hasMany(UsersCategories::className(), ['category_id' => 'id']);
     }
-
-    public function getCatChecked()
-    {
-        return $this->catChecked;
-    }
-
-    public function setCatChecked($checked)
-    {
-        $this->catChecked = $checked;
-    }
 }

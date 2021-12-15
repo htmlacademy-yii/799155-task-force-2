@@ -3,7 +3,12 @@
 namespace app\models;
 
 use yii\base\Model;
-
+/**
+ * Класс сущности для выбора категорий в форме views/tasks/index.php
+ * @property array $categoriesCheckArray массив выбранных чекбоксов для категорий
+ * @property int $additionCategoryCheck  чекбокс для дополнительного условия
+ * @property int|'' $period              индекс для выбора временного интервала
+ */
 class Categories extends Model
 {
     public const MAIN_CATEGORIES = 'main_categories';

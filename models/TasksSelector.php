@@ -10,6 +10,23 @@ use yii\web\Controller;
 use app\models\Categories;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Класс модели для обработки формы views/tasks/index.php
+ *
+ * @property int $id
+ * @property int $custom_id заказчик
+ * @property int $contr_id исполнитель
+ * @property string $name
+ * @property string|null $description
+ * @property int $cat_id категория задания
+ * @property int $loc_id локация задания
+ * @property int $budget
+ * @property string $add_date
+ * @property string $deadline срок выполнения задания
+ * @property string $fin_date фактический срок выполнения задания
+ * @property string $status
+ */
+
 class TasksSelector extends Model
 {
     public const SELECT_PERIODS = [
@@ -50,7 +67,13 @@ class TasksSelector extends Model
         ];
     }
 
-    public function selectNewTasks($categories)
+    /**
+     * Делает выборку новых заданий с учетом желаемых категорий и
+     * времени появления заданий
+     * @param Categories $categories сущность для выбора категорий в форме views/tasks/index.php
+     * @return array возвращает массив выбранных новых заданий
+     */
+    public function selectNewTasks($categories): array
     {
         $request = Yii::$app->request;
         $selectedCategoriesId = Categories::CATEGORIES_NOT_SELECTED;
@@ -104,7 +127,7 @@ class TasksSelector extends Model
             innerJoin('categories', 'cat_id = categories.id')->
             innerJoin('cities', 'cities.id = locations.city_id');
         if (strlen($period) > 0) {
-            $hours = array_keys(self::SELECT_PERIODS);//[1, 12, 24];
+            $hours = array_keys(self::SELECT_PERIODS);
             $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
             $query = $query->andWhere(['>', 'add_date', "$date"]);
         }
