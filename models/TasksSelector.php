@@ -3,29 +3,9 @@
 namespace app\models;
 
 use Yii;
-use yii\base\Model;
 use app\models\Task;
-use app\models\Category;
-use yii\web\Controller;
 use app\models\Categories;
 use yii\helpers\ArrayHelper;
-
-/**
- * Класс модели для обработки формы views/tasks/index.php
- *
- * @property int $id
- * @property int $custom_id заказчик
- * @property int $contr_id исполнитель
- * @property string $name
- * @property string|null $description
- * @property int $cat_id категория задания
- * @property int $loc_id локация задания
- * @property int $budget
- * @property string $add_date
- * @property string $deadline срок выполнения задания
- * @property string $fin_date фактический срок выполнения задания
- * @property string $status
- */
 
 class TasksSelector extends Task
 {
