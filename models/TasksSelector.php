@@ -27,7 +27,7 @@ use yii\helpers\ArrayHelper;
  * @property string $status
  */
 
-class TasksSelector extends Model
+class TasksSelector extends Task
 {
     public const SELECT_PERIODS = [
         '1' => 'час',
@@ -35,45 +35,13 @@ class TasksSelector extends Model
         '24' => 'часа',
     ];
 
-    public function rules()
-    {
-        return [
-            [['custom_id', 'contr_id', 'name', 'cat_id', 'loc_id',
-                'budget', 'add_date', 'deadline', 'fin_date', 'status'], 'required'],
-            [['custom_id', 'contr_id', 'cat_id', 'loc_id', 'budget'], 'integer'],
-            [['description'], 'string'],
-            [['add_date', 'deadline', 'fin_date'], 'safe'],
-            [['add_date', 'deadline', 'fin_date'], 'date'],
-            [['name'], 'string', 'max' => 256],
-            [['status'], 'string', 'max' => 16],
-        ];
-    }
-
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'custom_id' => 'Custom ID',
-            'contr_id' => 'Contr ID',
-            'name' => 'Name',
-            'description' => 'Description',
-            'cat_id' => 'Cat ID',
-            'loc_id' => 'Loc ID',
-            'budget' => 'Budget',
-            'add_date' => 'Add Date',
-            'deadline' => 'Deadline',
-            'fin_date' => 'Fin Date',
-            'status' => 'Status',
-        ];
-    }
-
     /**
      * Делает выборку новых заданий с учетом желаемых категорий и
      * времени появления заданий
      * @param Categories $categories сущность для выбора категорий в форме views/tasks/index.php
      * @return array возвращает массив выбранных новых заданий
      */
-    public function selectNewTasks($categories): array
+    public static function selectNewTasks($categories): array
     {
         $request = Yii::$app->request;
         $selectedCategoriesId = Categories::CATEGORIES_NOT_SELECTED;
@@ -91,7 +59,7 @@ class TasksSelector extends Model
                 $period = $categories->period;
             }
         }
-        $query = Task::find()->select([
+        $query = self::find()->select([
             'tasks.name',
             'tasks.budget',
             'cities.name as city',

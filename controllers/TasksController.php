@@ -14,8 +14,7 @@ class TasksController extends Controller
     public function actionIndex()
     {
         $categories = new Categories();
-        $tasksSelector = new TasksSelector();
-        $tasks = $tasksSelector->selectNewTasks($categories);
+        $tasks = TasksSelector::selectNewTasks($categories);
         $cats = Category::find()->select("*")->all();
         $categoryNames[Categories::MAIN_CATEGORIES] = ArrayHelper::map($cats, 'id', 'name');
         $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
