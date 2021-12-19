@@ -23,9 +23,6 @@ use yii\db\ActiveRecord;
  */
 class Task extends ActiveRecord
 {
-    public $street;
-    public $city;
-    public $category;
     /**
      * {@inheritdoc}
      */

@@ -7,8 +7,20 @@ use app\models\Task;
 use app\models\Categories;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Класс для обработки формы в views/tasks/index.php
+ * @property string $street адрес задания
+ * @property string $city город
+ * @property string $category категория задания
+ */
+
 class TasksSelector extends Task
 {
+
+    public $street;
+    public $city;
+    public $category;
+
     public const SELECT_PERIODS = [
         '1' => 'час',
         '12' => 'часов',
