@@ -113,7 +113,7 @@ use app\models\Categories;
                             'class' => 'head-card',
                         ]
                     ]
-                )->dropDownList($categoryNames[Categories::PERIOD], $options);
+                )->dropDownList($categoryNames[Categories::PERIODS], $options);
                 ?>
             </div>
             <?= Html::submitButton('Искать', ['class' => 'button button--blue']) ?>
