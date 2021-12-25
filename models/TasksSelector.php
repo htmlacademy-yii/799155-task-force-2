@@ -21,7 +21,7 @@ class TasksSelector extends Task
     public $city;
     public $category;
 
-    public const SELECT_PERIODS = [
+    public const TIME_PERIODS = [
         '1' => 'час',
         '12' => 'часов',
         '24' => 'часа',
@@ -87,7 +87,7 @@ class TasksSelector extends Task
             innerJoin('categories', 'cat_id = categories.id')->
             innerJoin('cities', 'cities.id = locations.city_id');
         if (strlen($period) > 0) {
-            $hours = array_keys(self::SELECT_PERIODS);
+            $hours = array_keys(self::TIME_PERIODS);
             $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
             $query = $query->andWhere(['>', 'add_date', "$date"]);
         }

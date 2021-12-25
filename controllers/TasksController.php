@@ -22,8 +22,8 @@ class TasksController extends Controller
             function ($key, $value) {
                 return $key . ' ' . $value;
             },
-            array_keys(TasksSelector::SELECT_PERIODS),
-            array_values(TasksSelector::SELECT_PERIODS)
+            array_keys(TasksSelector::TIME_PERIODS),
+            array_values(TasksSelector::TIME_PERIODS)
         );
         return $this->render('index', [
             'tasks' => $tasks,
