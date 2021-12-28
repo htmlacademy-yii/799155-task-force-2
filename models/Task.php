@@ -23,9 +23,6 @@ use yii\db\ActiveRecord;
  */
 class Task extends ActiveRecord
 {
-    public $street;
-    public $city;
-    public $category;
     /**
      * {@inheritdoc}
      */
@@ -45,6 +42,7 @@ class Task extends ActiveRecord
             [['custom_id', 'contr_id', 'cat_id', 'loc_id', 'budget'], 'integer'],
             [['description'], 'string'],
             [['add_date', 'deadline', 'fin_date'], 'safe'],
+            [['add_date', 'deadline', 'fin_date'], 'date'],
             [['name'], 'string', 'max' => 256],
             [['status'], 'string', 'max' => 16],
         ];

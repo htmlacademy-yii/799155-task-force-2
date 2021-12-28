@@ -4,7 +4,7 @@ namespace app\fixtures;
 
 use yii\test\ActiveFixture;
 
-class MessageFixture extends ActiveFixture
+class MessagesFixture extends ActiveFixture
 {
     public $modelClass = 'app\models\Message';
 }

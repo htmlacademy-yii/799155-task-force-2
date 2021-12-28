@@ -2,6 +2,9 @@
 
 /* @var $this yii\web\View */
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use yii\widgets\ActiveField;
+use app\models\Categories;
 
 ?>
 <div class="left-column">
@@ -46,33 +49,74 @@ use yii\helpers\Html;
 </div>
 <div class="right-column">
     <div class="right-card black">
-        <div class="search-form">
-            <form>
-                <h4 class="head-card">Категории</h4>
-                <div class="form-group">
-                    <div>
-                        <?php foreach ($cats as $cat) : ?>
-                            <input type="checkbox" id="<?=$cat->code?>">
-                            <label class="control-label" for="<?=$cat->code?>"><?=Html::encode($cat->name)?></label>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                <h4 class="head-card">Дополнительно</h4>
-                <div class="form-group">
-                    <input id="without-performer" type="checkbox" checked>
-                    <label class="control-label" for="without-performer">Без исполнителя</label>
-                </div>
-                <h4 class="head-card">Период</h4>
-                <div class="form-group">
-                    <label for="period-value"></label>
-                    <select id="period-value">
-                        <option>1 час</option>
-                        <option>12 часов</option>
-                        <option>24 часа</option>
-                    </select>
-                </div>
-                <input type="button" class="button button--blue" value="Искать">
-            </form>
-        </div>
+        <?php $form = ActiveForm::begin(['id' => 'search-form', 'options' => ['class' => 'search-form']]); ?>
+            <div class="form-group">
+            <?php
+                $this->params = is_array($categories->categoriesCheckArray) ?
+                                            $categories->categoriesCheckArray : [];
+                echo $form->field(
+                    $categories,
+                    'categoriesCheckArray',
+                    [
+                        'labelOptions' => [
+                            'class' => 'head-card',
+                        ],
+                    ]
+                )->checkboxList(
+                    $categoryNames[Categories::MAIN_CATEGORIES],
+                    [
+                        'separator' => '<br>',
+                        'item' => function ($index, $label, $name, $checked, $value) {
+                            if (in_array($value, $this->params) === true) {
+                                    $checked = 'checked';
+                            }
+                            return "<span><input type='checkbox' {$checked} name='{$name}' 
+                                value='{$value}' id='{$index}'>
+                                <label class='control-label' for='{$index}'>{$label}</label></span>";
+                        },
+                        'unselect' => Categories::CATEGORIES_NOT_SELECTED,
+                    ]
+                );
+                ?>
+            </div>
+            <h4 class="head-card">Дополнительно</h4>
+            <div class="form-group">
+            <?php
+                $options = [
+                    'label' => $categoryNames[Categories::ADD_CONDITION],
+                    'uncheck' => Categories::NO_ADDITION_SELECTED,
+                ];
+                echo $form->field(
+                    $categories,
+                    'additionCategoryCheck',
+                    [
+                        'labelOptions' => [
+                            'class' => 'head-card',
+                        ],
+                        'template' => '{input}<label class="control-label" 
+                                    for="categories-additioncategorycheck">{label}</label>',
+                    ]
+                )->checkbox($options, false);
+                ?>
+            </div>
+            <h4 class="head-card"> </h4>
+            <div class="form-group">
+            <?php
+                $options = [
+                    'prompt' => 'Выберите период',
+                ];
+                echo $form->field(
+                    $categories,
+                    'period',
+                    [
+                        'labelOptions' => [
+                            'class' => 'head-card',
+                        ]
+                    ]
+                )->dropDownList($categoryNames[Categories::PERIODS], $options);
+                ?>
+            </div>
+            <?= Html::submitButton('Искать', ['class' => 'button button--blue']) ?>
+        <?php ActiveForm::end(); ?>
     </div>
 </div>

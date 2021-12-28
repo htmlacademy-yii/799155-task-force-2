@@ -4,7 +4,7 @@ namespace app\fixtures;
 
 use yii\test\ActiveFixture;
 
-class DocumentFixture extends ActiveFixture
+class DocumentsFixture extends ActiveFixture
 {
     public $modelClass = 'app\models\Document';
 }

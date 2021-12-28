@@ -56,7 +56,7 @@ DROP TABLE IF EXISTS `tasks`;
 CREATE TABLE tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     custom_id INT NOT NULL COMMENT 'заказчик',
-    contr_id INT NOT NULL COMMENT 'исполнитель',
+    contr_id INT DEFAULT 0 COMMENT 'исполнитель',
     name VARCHAR(256) NOT NULL,
     description TEXT DEFAULT NULL,
     cat_id  INT NOT NULL COMMENT 'категория задания',
@@ -64,7 +64,7 @@ CREATE TABLE tasks (
     budget INT NOT NULL,
     add_date DATETIME NOT NULL,
     deadline DATETIME NOT NULL COMMENT 'срок выполнения задания',
-    fin_date DATETIME NOT NULL COMMENT 'фактический срок выполнения задания',
+    fin_date DATETIME DEFAULT NULL COMMENT 'фактический срок выполнения задания',
     status VARCHAR(16) NOT NULL 
 ) COMMENT = 'Таблица заданий';
 

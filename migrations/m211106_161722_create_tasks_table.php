@@ -17,7 +17,7 @@ class m211106_161722_create_tasks_table extends Migration
         $this->createTable('{{%tasks}}', [
             'id' => $this->primaryKey(),
             'custom_id' => $this->integer()->notNull()->comment('заказчик'),
-            'contr_id' => $this->integer()->notNull()->comment('исполнитель'),
+            'contr_id' => $this->integer()->defaultValue(0)->comment('исполнитель'),
             'name' => $this->string(256)->notNull(),
             'description' => $this->text()->null(),
             'cat_id' => $this->integer()->notNull()->comment('категория задания'),
@@ -25,7 +25,7 @@ class m211106_161722_create_tasks_table extends Migration
             'budget' => $this->integer()->notNull(),
             'add_date' => $this->dateTime()->notNull(),
             'deadline' => $this->dateTime()->notNull()->comment('срок выполнения задания'),
-            'fin_date' => $this->dateTime()->notNull()->comment('фактический срок выполнения задания'),
+            'fin_date' => $this->dateTime()->null()->comment('фактический срок выполнения задания'),
             'status' => $this->string('16')->notNull(),
         ])->comment('Таблица заданий');
     }

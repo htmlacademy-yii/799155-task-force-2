@@ -4,7 +4,7 @@ namespace app\fixtures;
 
 use yii\test\ActiveFixture;
 
-class ReviewFixture extends ActiveFixture
+class ReviewsFixture extends ActiveFixture
 {
     public $modelClass = 'app\models\Review';
 }
