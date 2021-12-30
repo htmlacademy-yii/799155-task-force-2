@@ -1,6 +1,8 @@
 <?php
 
 /* @var $this yii\web\View */
+/* @var $tasks массив заданий*/
+
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\ActiveField;
@@ -12,7 +14,7 @@ use app\models\Categories;
     <?php foreach ($tasks as $task) : ?>
         <div class="task-card">
         <div class="header-task">
-            <a  href="#" class="link link--block link--big"><?=Html::encode($task->name)?></a>
+            <a  href=<?='tasks/' . $task->id?> class="link link--block link--big"><?=Html::encode($task->name)?></a>
             <p class="price price--task"><?=Html::encode($task->budget)?> ₽</p>
         </div>
         <p class="info-text"><span class="current-time">
@@ -23,7 +25,7 @@ use app\models\Categories;
         <div class="footer-task">
             <p class="info-text town-text"><?=Html::encode($task->city . ', ' . $task->street)?></p>
             <p class="info-text category-text"><?=Html::encode($task->category)?></p>
-            <a href="#" class="button button--black">Смотреть Задание</a>
+            <a href=<?='tasks/' . $task->id?> class="button button--black">Смотреть Задание</a>
         </div>
     </div>
     <?php endforeach; ?>

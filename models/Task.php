@@ -23,6 +23,25 @@ use yii\db\ActiveRecord;
  */
 class Task extends ActiveRecord
 {
+    //новое задание
+    public const STATUS_NEW = 'new';
+    //задание выполнено
+    public const STATUS_DONE = 'done';
+    //задание отменено
+    public const STATUS_CANCELED = 'canceled';
+    //задание в работе
+    public const STATUS_ON_DEAL = 'on_deal';
+    //задание провалено
+    public const STATUS_REFUSED = 'refused';
+
+    public const TASK_DESCR = [
+        self::STATUS_NEW => 'Новое задание',
+        self::STATUS_DONE => 'Задание выполнено',
+        self::STATUS_CANCELED => 'Задание отменено',
+        self::STATUS_ON_DEAL => 'Задание в работе',
+        self::STATUS_REFUSED => 'Задание провалено',
+    ];
+
     /**
      * {@inheritdoc}
      */

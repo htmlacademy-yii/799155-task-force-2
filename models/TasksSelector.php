@@ -52,6 +52,7 @@ class TasksSelector extends Task
             }
         }
         $query = self::find()->select([
+            'tasks.id',
             'tasks.name',
             'tasks.budget',
             'cities.name as city',
@@ -61,20 +62,20 @@ class TasksSelector extends Task
         ]);
         if ($selectedCategoriesId === Categories::CATEGORIES_NOT_SELECTED) {
             if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                $query = $query->where(['tasks.status' => 'new']);
+                $query = $query->where(['tasks.status' => Task::STATUS_NEW]);
             } else {
-                $query = $query->where(['tasks.status' => 'new', 'contr_id' => 0]);
+                $query = $query->where(['tasks.status' => Task::STATUS_NEW, 'contr_id' => 0]);
             }
         } else {
             if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
                 foreach ($selectedCategoriesId as $catId) {
-                    $query = $query->orWhere(['tasks.status' => 'new', 'cat_id' => "$catId"]);
+                    $query = $query->orWhere(['tasks.status' => Task::STATUS_NEW, 'cat_id' => "$catId"]);
                 }
             } else {
                 foreach ($selectedCategoriesId as $catId) {
                     $query = $query->orWhere(
                         [
-                            'tasks.status' => 'new',
+                            'tasks.status' => Task::STATUS_NEW,
                             'contr_id' => 0,
                             'cat_id' => "$catId"
                         ]
@@ -94,5 +95,32 @@ class TasksSelector extends Task
         $query = $query->limit(3)->offset(0)->orderBy(['add_date' => SORT_DESC]);
         $tasks = $query->all();
         return $tasks;
+    }
+
+    public static function selectTask($taskId): object
+    {
+        $query = self::find()->select([
+            'tasks.id',
+            'tasks.name',
+            'tasks.budget',
+            'tasks.status',
+            'tasks.description',
+            'cities.name as city',
+            'locations.street as street',
+            'categories.name as category',
+            'add_date',
+            'deadline',
+        ]);
+        $query->where(['tasks.id' => $taskId]);
+        $query = $query->
+            innerJoin('locations', 'loc_id = locations.id')->
+            innerJoin('categories', 'cat_id = categories.id')->
+            innerJoin('cities', 'cities.id = locations.city_id');
+        $task = $query->one();
+        if ($task === null) {
+            throw new NotFoundHttpException('Задание id = ' . $taskId . ' не найдено!');
+        }
+        $task->status = Task::TASK_DESCR[$task->status];
+        return $task;
     }
 }

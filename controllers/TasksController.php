@@ -31,4 +31,12 @@ class TasksController extends Controller
             'categoryNames' => $categoryNames,
         ]);
     }
+
+    public function actionView($id)
+    {
+        $task = TasksSelector::selectTask($id);
+        return $this->render('view', [
+            'task' => $task,
+        ]);
+    }
 }
