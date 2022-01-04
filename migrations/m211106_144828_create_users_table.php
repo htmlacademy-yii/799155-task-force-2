@@ -21,7 +21,7 @@ class m211106_144828_create_users_table extends Migration
             'password' => $this->string(64)->notNull(),
             'add_date' => $this->dateTime()->notNull(),
             'contractor' => $this->tinyInteger(3)->defaultValue(0)->comment('исполнитль или заказчик'),
-            'city' => $this->integer()->defaultValue(0)->comment('id города'),
+            'city_id' => $this->integer()->defaultValue(0)->comment('id города'),
         ])->comment('Таблица пользователей');
     }
 

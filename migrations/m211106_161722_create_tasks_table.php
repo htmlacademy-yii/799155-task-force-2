@@ -26,7 +26,7 @@ class m211106_161722_create_tasks_table extends Migration
             'add_date' => $this->dateTime()->notNull(),
             'deadline' => $this->dateTime()->notNull()->comment('срок выполнения задания'),
             'fin_date' => $this->dateTime()->null()->comment('фактический срок выполнения задания'),
-            'status' => $this->string('16')->notNull(),
+            'status' => $this->string('16')->notNull()->defaultValue('new'),
         ])->comment('Таблица заданий');
     }
 

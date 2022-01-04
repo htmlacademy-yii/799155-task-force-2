@@ -20,6 +20,13 @@ use Yii;
  */
 class Profile extends \yii\db\ActiveRecord
 {
+    //аноним
+    public const ROLE_ANONYMOUS = 'anonymous';
+    //роль исполнителя
+    public const ROLE_CONTRACTOR = 'contractor';
+    //роль заказчика
+    public const ROLE_CUSTOMER = 'customer';
+
     /**
      * {@inheritdoc}
      */

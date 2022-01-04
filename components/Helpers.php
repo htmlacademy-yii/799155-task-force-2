@@ -102,6 +102,22 @@ class Helpers extends Component
     {
         $date = getdate(strtotime($born));
         $now = getdate();
-        return $now['year'] - $born['year'];
+        return $now['year'] - $date['year'];
+    }
+
+    public function translatePhoneNumber($mask, $number): string
+    {
+        $phone = [];
+        $digits = str_split($number);
+        $symbols = str_split($mask);
+        foreach ($symbols as $char) {
+            if ($char !== '#') {
+                $phone[] = $char;
+            } else {
+                $phone[] = current($digits);
+                next($digits);
+            }
+        }
+        return implode($phone);
     }
 }
