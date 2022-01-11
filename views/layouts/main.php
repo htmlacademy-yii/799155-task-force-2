@@ -8,7 +8,20 @@ use yii\helpers\Url;
 use app\assets\AppAsset;
 
 AppAsset::register($this);
+$initUrl = '/site/index';
+$regUrl = '/registration';
+$logUrl = '/login';
+$hidden = '';
+switch (Url::current()) {
+    case $regUrl:
+    case $logUrl:
+    case $initUrl:
+        $hidden = 'hidden';
+        break;
+    default: '';
+}
 ?>
+
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
@@ -22,10 +35,9 @@ AppAsset::register($this);
 </head>
 <body>
   <?php $this->beginBody() ?>
-
-    <header class="page-header">
+    <header class="page-header" <?=$hidden?>>
         <nav class="main-nav">
-            <a href='#' class="header-logo">
+            <a href='/site' class="header-logo">
                 <img class="logo-image" src=<?=Url::to('/img/logotype.png', true);?>
                     width=227 height=60 alt="taskforce">
             </a>
@@ -72,6 +84,7 @@ AppAsset::register($this);
     <main class="main-content container">
         <?=$content; ?>
     </main>
+<?php if (Url::current() !== $initUrl) :?>
     <footer class="footer-task">
         <div class="container">
             <p class="text-info">&copy; My Company <?= date('Y') ?></p>
@@ -82,3 +95,4 @@ AppAsset::register($this);
 </body>
 </html>
 <?php $this->endPage() ?>
+<?php endif; ?>

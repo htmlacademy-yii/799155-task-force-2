@@ -6,7 +6,7 @@ use Yii;
 use app\models\User;
 use app\models\TasksSelector;
 use app\models\ReviewsSelector;
-use yii\web\NotFoundHttpException;
+use TaskForce\exception\TaskForceException;
 
 class UsersSelector extends User
 {
@@ -52,7 +52,7 @@ class UsersSelector extends User
             innerJoin('profiles', 'users.id = profiles.user_id');
         $user = $query->one();
         if ($user === null) {
-            throw new NotFoundHttpException('Пользователь id = ' . $userId . ' не найден!');
+            throw new TaskForceException('Пользователь id = ' . $userId . ' не найден!');
         }
         $tasks = TasksSelector::selectTasksByContractor($userId, [TasksSelector::STATUS_DONE]);
         $user->doneCounter = count($tasks);

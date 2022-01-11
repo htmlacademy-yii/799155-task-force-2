@@ -105,7 +105,15 @@ class Helpers extends Component
         return $now['year'] - $date['year'];
     }
 
-    public function translatePhoneNumber($mask, $number): string
+    /**
+     * Возвращает строку с телефонным номером в соответствии с маской
+     * @param string $mask маска номера, в кторой символ # будет заменён на
+     * очередной символ из $number
+     * @param string $number строка с цифрами телефонного номера
+     * 
+     * @return string строка с телефонным номером
+     */
+    public function translatePhoneNumber(string $mask, string $number): string
     {
         $phone = [];
         $digits = str_split($number);
@@ -119,5 +127,23 @@ class Helpers extends Component
             }
         }
         return implode($phone);
+    }
+
+    /**
+     * Возращает первую строку с описанием ошибки
+     * @param ActiveRecord $model 
+     * 
+     * @return string|null первая же строка с описанием ошибки из массива $errors
+     */
+    public function getFirstErrorString($model): ?string
+    {
+        $errors = $model->getErrors();
+        $names = array_keys($model->attributes);
+        foreach ($names as $name) {
+            if (array_key_exists($name, $errors)) {
+                return $errors[$name][0];
+            }
+        }
+        return null;
     }
 }

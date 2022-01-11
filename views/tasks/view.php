@@ -84,14 +84,12 @@ use app\models\Task;
     <div class="right-card white file-card">
         <h4 class="head-card">Файлы задания</h4>
         <ul class="enumeration-list">
-            <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip">my_picture.jpg</a>
-                <p class="file-size">356 Кб</p>
+            <?php foreach ($docs as $doc) :?>
+                <li class="enumeration-item">
+                <a href="#" class="link link--block link--clip"><?=$doc->link?></a>
+                <p class="file-size"><?=$doc->size?> Кб</p>
             </li>
-            <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip">information.docx</a>
-                <p class="file-size">12 Кб</p>
-            </li>
+            <?php endforeach;?>
         </ul>
     </div>
 </div>

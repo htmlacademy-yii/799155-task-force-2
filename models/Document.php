@@ -27,8 +27,8 @@ class Document extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['task_id', 'link'], 'required'],
-            [['task_id'], 'integer'],
+            [['task_id', 'link', 'size'], 'required'],
+            [['task_id', 'size'], 'integer'],
             [['link'], 'string', 'max' => 512],
         ];
     }
@@ -42,6 +42,19 @@ class Document extends \yii\db\ActiveRecord
             'id' => 'ID',
             'task_id' => 'Task ID',
             'link' => 'Link',
+            'size' => 'Размер ресурса, Кб',
         ];
+    }
+
+    /**
+     * Делает выборку документов для заанного id задачи
+     * @param int $taskId id задания
+     *
+     * @return array возвращает массив выбранных документов
+     */
+    public static function selectDocuments(int $taskId): array
+    {
+        $docs = self::find()->select(['link', 'size'])->where(['task_id' => $taskId])->all();
+        return $docs;
     }
 }
