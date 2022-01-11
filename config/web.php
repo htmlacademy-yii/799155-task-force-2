@@ -52,6 +52,9 @@ $config = [
             'showScriptName' => false,
             'enableStrictParsing' => false,
             'rules' => [
+                'task/<id:\d+>' => 'tasks/view',
+                'user/<id:\d+>' => 'users/view',
+                'category/<id:\d+>' => 'tasks/category',
             ],
         ],
     ],

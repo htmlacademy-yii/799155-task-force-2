@@ -10,5 +10,5 @@ return [
     'custom_id' => $faker->numberBetween(6, 10),
     'comment' => $faker->realText(),
     'add_date' => $faker->date(),
-    'rating' => $faker->numberBetween(1, 8),
+    'rating' => $faker->numberBetween(0, 5),
 ];

@@ -6,6 +6,7 @@ use Yii;
 use app\models\Task;
 use app\models\Categories;
 use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
 
 /**
  * Класс для обработки формы в views/tasks/index.php
@@ -33,14 +34,14 @@ class TasksSelector extends Task
      * @param Categories $categories сущность для выбора категорий в форме views/tasks/index.php
      * @return array возвращает массив выбранных новых заданий
      */
-    public static function selectNewTasks($categories): array
+    public static function selectTasks(Categories $categories, array $status): array
     {
-        $request = Yii::$app->request;
-        $selectedCategoriesId = Categories::CATEGORIES_NOT_SELECTED;
-        $additionalCondition = Categories::NO_ADDITION_SELECTED;
+        $selectedCategoriesId = $categories->categoriesCheckArray;
+        $additionalCondition = $categories->additionCategoryCheck;
         $period = '';
+        $request = Yii::$app->request;
         if ($request->isPost) {
-            $categories->load(Yii::$app->request->post());
+            $categories->load($request->post());
             if ($categories->categoriesCheckArray !== Categories::CATEGORIES_NOT_SELECTED) {
                 $selectedCategoriesId = array_values($categories->categoriesCheckArray);
             }
@@ -52,6 +53,7 @@ class TasksSelector extends Task
             }
         }
         $query = self::find()->select([
+            'tasks.id',
             'tasks.name',
             'tasks.budget',
             'cities.name as city',
@@ -61,24 +63,20 @@ class TasksSelector extends Task
         ]);
         if ($selectedCategoriesId === Categories::CATEGORIES_NOT_SELECTED) {
             if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                $query = $query->where(['tasks.status' => 'new']);
+                $query = $query->where(['in' , 'tasks.status', $status]);
             } else {
-                $query = $query->where(['tasks.status' => 'new', 'contr_id' => 0]);
+                $query = $query->where(['in' , 'tasks.status', $status]);
+                $query = $query->andWhere(['contr_id' => 0]);
             }
         } else {
             if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                foreach ($selectedCategoriesId as $catId) {
-                    $query = $query->orWhere(['tasks.status' => 'new', 'cat_id' => "$catId"]);
-                }
+                $query = $query->where(['in' , 'tasks.status', $status]);
+                $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
             } else {
                 foreach ($selectedCategoriesId as $catId) {
-                    $query = $query->orWhere(
-                        [
-                            'tasks.status' => 'new',
-                            'contr_id' => 0,
-                            'cat_id' => "$catId"
-                        ]
-                    );
+                    $query = $query->where(['in' , 'tasks.status', $status]);
+                    $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
+                    $query = $query->andWhere(['contr_id' => 0]);
                 }
             }
         }
@@ -94,5 +92,68 @@ class TasksSelector extends Task
         $query = $query->limit(3)->offset(0)->orderBy(['add_date' => SORT_DESC]);
         $tasks = $query->all();
         return $tasks;
+    }
+
+    /**
+     * Делает выборку заданий с заданным исполнителем
+     * @param $contractor исполнитель задания
+     * @param string|null $taskStatuses массив требуемых статусов заданий
+     * @param int|null $limit требуемый статус задания
+     * @return array возвращает массив выбранных заданий
+     */
+    public static function selectTasksByContractor(
+        int $contractor,
+        array $taskStatuses = null,
+        int $limit = null
+    ): array {
+        $query = self::find()->select([
+            'id',
+            'status',
+            'name',
+            'add_date',
+        ]);
+        $query->where(['tasks.contr_id' => $contractor]);
+        if ($taskStatuses and count($taskStatuses)) {
+            $query = $query->andWhere(['in', 'tasks.status', $taskStatuses]);
+        }
+        if ($limit) {
+            $query = $query->limit($limit)->offset(0);
+        }
+        $query = $query->orderBy(['add_date' => SORT_DESC]);
+        $tasks = $query->all();
+        return $tasks;
+    }
+
+    /**
+     * Возвращает задание с заданным id
+     * @param int $taskId id задания
+     * @return object возвращает искомую сущность
+     */
+    public static function selectTask(int $taskId): object
+    {
+        $query = self::find()->select([
+            'tasks.id',
+            'tasks.name',
+            'tasks.budget',
+            'tasks.status',
+            'tasks.description',
+            'cities.name as city',
+            'locations.street as street',
+            'categories.name as category',
+            'tasks.add_date as add_date',
+            'tasks.deadline',
+            'cat_id',
+        ]);
+        $query->where(['tasks.id' => $taskId]);
+        $query = $query->
+            innerJoin('users', 'custom_id = users.id')->
+            innerJoin('locations', 'loc_id = locations.id')->
+            innerJoin('categories', 'cat_id = categories.id')->
+            innerJoin('cities', 'cities.id = locations.city_id');
+        $task = $query->one();
+        if ($task === null) {
+            throw new NotFoundHttpException('Задание id = ' . $taskId . ' не найдено!');
+        }
+        return $task;
     }
 }

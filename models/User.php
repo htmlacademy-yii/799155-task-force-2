@@ -18,6 +18,9 @@ use Yii;
  */
 class User extends \yii\db\ActiveRecord
 {
+    public const STATUS_FREE = 'Открыт для новых заказов';
+    public const STATUS_BUSY = 'Занят';
+
     /**
      * {@inheritdoc}
      */
@@ -32,10 +35,12 @@ class User extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'email', 'password', 'add_date'], 'required'],
-            [['add_date'], 'safe'],
+            [['name', 'email', 'password', 'add_date', 'contractor'], 'required'],
+            [['name', 'email', 'password', 'add_date', 'city_id', 'contractor'], 'safe'],
             [['name', 'email', 'password'], 'string', 'max' => 64],
             [['email'], 'unique'],
+            [['city_id', 'contractor'], 'integer'],
+            [['add_date'], 'date'],
         ];
     }
 
@@ -50,6 +55,8 @@ class User extends \yii\db\ActiveRecord
             'email' => 'Email',
             'password' => 'Password',
             'add_date' => 'Add Date',
+            'city_id' => 'ID города',
+            'contractor' => 'Исполнитель?',
         ];
     }
 

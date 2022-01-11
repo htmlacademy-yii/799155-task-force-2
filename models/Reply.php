@@ -18,6 +18,9 @@ use Yii;
  */
 class Reply extends \yii\db\ActiveRecord
 {
+    public const STATUS_ACCEPTED = 'accepted';
+    public const STATUS_REJECTED = 'rejected';
+
     /**
      * {@inheritdoc}
      */

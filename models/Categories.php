@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\base\Model;
+
 /**
  * Класс сущности для выбора категорий в форме views/tasks/index.php
  * @property array $categoriesCheckArray массив выбранных чекбоксов для категорий

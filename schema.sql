@@ -65,7 +65,7 @@ CREATE TABLE tasks (
     add_date DATETIME NOT NULL,
     deadline DATETIME NOT NULL COMMENT 'срок выполнения задания',
     fin_date DATETIME DEFAULT NULL COMMENT 'фактический срок выполнения задания',
-    status VARCHAR(16) NOT NULL 
+    status VARCHAR(16) DEFAULT 'new' COMMENT 'текущий стстаус задания'
 ) COMMENT = 'Таблица заданий';
 
 CREATE INDEX task_ind ON tasks(name);
@@ -76,7 +76,9 @@ CREATE TABLE users (
     name VARCHAR(64) NOT NULL,
     email VARCHAR(64) NOT NULL UNIQUE,
     password VARCHAR(64) NOT NULL,
-    add_date DATETIME NOT NULL
+    add_date DATETIME NOT NULL,
+    contractor TINYINT(3) NOT NULL DEFAULT 0 COMMENT 'исполнитель или заказчик',
+    city_id INT UNSIGNED NOT NULL DEFAULT 0
 ) COMMENT = 'Таблица пользователей';
 
 CREATE INDEX user_ind ON users(email);
@@ -106,7 +108,7 @@ CREATE TABLE replies (
     comment TEXT DEFAULT NULL,
     add_date DATETIME NOT NULL,
     rating INT NOT NULL,
-    status VARCHAR(16) NOT NULL COMMENT 'accepted или rejected'
+    status VARCHAR(16) DEFAULT NULL COMMENT 'accepted или rejected'
 ) COMMENT = 'Таблица откликов исполнителей';
 
 CREATE INDEX reply_ind ON replies(add_date);

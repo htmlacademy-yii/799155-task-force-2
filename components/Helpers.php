@@ -72,4 +72,52 @@ class Helpers extends Component
         }
         return $mins . " " . $this->getNounPluralForm($mins, "минута", "минуты", "минут") . " назад";
     }
+
+    /**
+     * Возвращает строку-дата в виде 01 января 2021, 14:00
+     *
+     * @param string $strDate дата в стоковом формате
+     *
+     * @return string дата с названием месяца на русском языке
+    */
+    public function ruDate($strDate): string
+    {
+        $date = new \DateTime($strDate);
+        // номер месяца
+        $index = $date->format('n') - 1;
+        $months = [
+            'Января', 'Февраля', 'Марта', 'Апреля', 'Майя', 'Июня', 'Июля',
+            'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'
+            ];
+        return $date->format("d $months[$index] Y, H:i");
+    }
+
+    /**
+     * Возвращает разницу в годах
+     * @param string $date дата в стоковом формате
+     *
+     * @return int разница в годах
+    */
+    public function getAge($born): int
+    {
+        $date = getdate(strtotime($born));
+        $now = getdate();
+        return $now['year'] - $date['year'];
+    }
+
+    public function translatePhoneNumber($mask, $number): string
+    {
+        $phone = [];
+        $digits = str_split($number);
+        $symbols = str_split($mask);
+        foreach ($symbols as $char) {
+            if ($char !== '#') {
+                $phone[] = $char;
+            } else {
+                $phone[] = current($digits);
+                next($digits);
+            }
+        }
+        return implode($phone);
+    }
 }

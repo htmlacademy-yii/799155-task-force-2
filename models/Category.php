@@ -4,6 +4,8 @@ namespace app\models;
 
 use Yii;
 use yii\db\ActiveRecord;
+use app\src\exception\TaskForceException;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "categories".
@@ -73,5 +75,20 @@ class Category extends ActiveRecord
     public function getUsersCategories()
     {
         return $this->hasMany(UsersCategories::className(), ['category_id' => 'id']);
+    }
+
+    public static function getCategoryNames()
+    {
+        $cats = self::find()->select("*")->all();
+        return ArrayHelper::map($cats, 'id', 'name');
+    }
+
+    public static function getName($catId)
+    {
+        $catName = self::getCategoryNames()[$catId];
+        if (!$catName) {
+            throw new TaskForceException('Категория с id = ' . $catId . ' не существует');
+        }
+        return $catName;
     }
 }

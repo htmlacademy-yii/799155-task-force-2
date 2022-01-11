@@ -4,19 +4,17 @@ namespace app\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\helpers\ArrayHelper;
 use app\models\Category;
 use app\models\Categories;
 use app\models\TasksSelector;
+use app\models\RepliesSelector;
 
 class TasksController extends Controller
 {
-    public function actionIndex()
+    private function renderTasks(Categories $categories, array $statuses)
     {
-        $categories = new Categories();
-        $tasks = TasksSelector::selectNewTasks($categories);
-        $cats = Category::find()->select("*")->all();
-        $categoryNames[Categories::MAIN_CATEGORIES] = ArrayHelper::map($cats, 'id', 'name');
+        $tasks = TasksSelector::selectTasks($categories, $statuses);
+        $categoryNames[Categories::MAIN_CATEGORIES] = Category::getCategoryNames();
         $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
         $categoryNames[Categories::PERIODS] = array_map(
             function ($key, $value) {
@@ -30,5 +28,28 @@ class TasksController extends Controller
             'categories' => $categories,
             'categoryNames' => $categoryNames,
         ]);
+    }
+
+    public function actionIndex()
+    {
+        $categories = new Categories();
+        return $this->renderTasks($categories, [TasksSelector::STATUS_NEW]);
+    }
+
+    public function actionView(int $id)
+    {
+        $task = TasksSelector::selectTask($id);
+        $replies = RepliesSelector::selectRepliesByTask($task->id);
+        return $this->render('view', [
+            'task' => $task,
+            'replies' => $replies,
+        ]);
+    }
+
+    public function actionCategory(int $id)
+    {
+        $categories = new Categories();
+        $categories->categoriesCheckArray = [$id];
+        return $this->renderTasks($categories, [TasksSelector::STATUS_NEW]);
     }
 }
