@@ -2,9 +2,11 @@
 
 namespace TaskForce\exception;
 
+use yii\web\NotFoundHttpException;
+
 /**
- * Базовый класс исключений
+ * Базовый класс исключений TaskForce
  */
-class TaskForceException extends \Exception
+class TaskForceException extends NotFoundHttpException
 {
 }

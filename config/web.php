@@ -55,6 +55,8 @@ $config = [
                 'task/<id:\d+>' => 'tasks/view',
                 'user/<id:\d+>' => 'users/view',
                 'category/<id:\d+>' => 'tasks/category',
+                'logon' => 'auth/logon',
+                'registration' => 'auth/registration',
             ],
         ],
     ],

@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "users".
@@ -12,11 +12,13 @@ use Yii;
  * @property string $email
  * @property string $password
  * @property string $add_date
+ * @property int $city_id
+ * @property int $contractor
  *
  * @property Category[] $categories
  * @property UsersCategories[] $usersCategories
  */
-class User extends \yii\db\ActiveRecord
+class User extends ActiveRecord
 {
     public const STATUS_FREE = 'Открыт для новых заказов';
     public const STATUS_BUSY = 'Занят';
@@ -35,7 +37,7 @@ class User extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'email', 'password', 'add_date', 'contractor'], 'required'],
+            [['name', 'email', 'password', 'contractor'], 'required'],
             [['name', 'email', 'password', 'add_date', 'city_id', 'contractor'], 'safe'],
             [['name', 'email', 'password'], 'string', 'max' => 64],
             [['email'], 'unique'],

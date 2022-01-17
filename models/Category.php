@@ -4,7 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\db\ActiveRecord;
-use app\src\exception\TaskForceException;
+use TaskForce\exception\TaskForceException;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -77,18 +77,31 @@ class Category extends ActiveRecord
         return $this->hasMany(UsersCategories::className(), ['category_id' => 'id']);
     }
 
-    public static function getCategoryNames()
+    /**
+     * Возвращает массив категорий заданий из БД
+     *
+     * @return array [id => name]
+     */
+    public static function getCategoryNames(): array
     {
         $cats = self::find()->select("*")->all();
         return ArrayHelper::map($cats, 'id', 'name');
     }
 
-    public static function getName($catId)
+    /**
+     * Возвращает название категории из БД
+     * @param int $id индекс категории
+     *
+     * @return string $name имя категории
+     */
+    public static function getName(int $id): string
     {
-        $catName = self::getCategoryNames()[$catId];
-        if (!$catName) {
-            throw new TaskForceException('Категория с id = ' . $catId . ' не существует');
+        $cat = self::find()->select([
+            'name'
+        ])->where(['id' => $id])->one();
+        if (!$cat) {
+            throw new TaskForceException('Категория с id= ' . $id . ' нет в БД');
         }
-        return $catName;
+        return $cat->name;
     }
 }

@@ -15,7 +15,8 @@ DROP TABLE IF EXISTS `documents`;
 CREATE TABLE documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT NOT NULL,
-    link VARCHAR(512) NOT NULL
+    link VARCHAR(512) NOT NULL,
+    size INT DEFAULT 0
 ) COMMENT = 'Таблица ссылок на дополнительные документы к заданию';
 
 CREATE INDEX doc_ind ON documents(task_id);
@@ -62,7 +63,7 @@ CREATE TABLE tasks (
     cat_id  INT NOT NULL COMMENT 'категория задания',
     loc_id INT NOT NULL COMMENT 'локация задания',
     budget INT NOT NULL,
-    add_date DATETIME NOT NULL,
+    add_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deadline DATETIME NOT NULL COMMENT 'срок выполнения задания',
     fin_date DATETIME DEFAULT NULL COMMENT 'фактический срок выполнения задания',
     status VARCHAR(16) DEFAULT 'new' COMMENT 'текущий стстаус задания'
@@ -76,7 +77,7 @@ CREATE TABLE users (
     name VARCHAR(64) NOT NULL,
     email VARCHAR(64) NOT NULL UNIQUE,
     password VARCHAR(64) NOT NULL,
-    add_date DATETIME NOT NULL,
+    add_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     contractor TINYINT(3) NOT NULL DEFAULT 0 COMMENT 'исполнитель или заказчик',
     city_id INT UNSIGNED NOT NULL DEFAULT 0
 ) COMMENT = 'Таблица пользователей';
@@ -106,7 +107,7 @@ CREATE TABLE replies (
     contr_id INT NOT NULL,
     price INT NOT NULL,
     comment TEXT DEFAULT NULL,
-    add_date DATETIME NOT NULL,
+    add_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     rating INT NOT NULL,
     status VARCHAR(16) DEFAULT NULL COMMENT 'accepted или rejected'
 ) COMMENT = 'Таблица откликов исполнителей';
@@ -119,7 +120,7 @@ CREATE TABLE reviews (
     task_id INT NOT NULL,
     custom_id INT NOT NULL COMMENT 'заказчик работы',
     contr_id INT NOT NULL COMMENT 'исполнитель работы',
-    add_date DATETIME NOT NULL,
+    add_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     comment TEXT NOT NULL COMMENT 'отзыв заказчика о работе',
     rating INT NOT NULL
 ) COMMENT = 'Таблица отзывов о работах исполнителей';
@@ -132,7 +133,7 @@ CREATE TABLE messages (
     content VARCHAR(256) NOT NULL,
     from_id INT NOT NULL COMMENT 'от кого сообщение',
     whom_id INT NOT NULL COMMENT 'кому сообщение',
-    add_date DATETIME NOT NULL
+    add_date DATETIME NOT NULL, DEFAULT CURRENT_TIMESTAMP
 ) COMMENT = 'Таблица сообщений пользователей';
 
 CREATE INDEX msg_ind ON messages(add_date);

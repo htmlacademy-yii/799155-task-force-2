@@ -8,6 +8,7 @@ use app\models\Category;
 use app\models\Categories;
 use app\models\TasksSelector;
 use app\models\RepliesSelector;
+use app\models\Document;
 
 class TasksController extends Controller
 {
@@ -40,9 +41,11 @@ class TasksController extends Controller
     {
         $task = TasksSelector::selectTask($id);
         $replies = RepliesSelector::selectRepliesByTask($task->id);
+        $docs = Document::selectDocuments($id);
         return $this->render('view', [
             'task' => $task,
             'replies' => $replies,
+            'docs' => $docs,
         ]);
     }
 

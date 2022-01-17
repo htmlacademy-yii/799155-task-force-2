@@ -6,7 +6,7 @@ use Yii;
 use app\models\Task;
 use app\models\Categories;
 use yii\helpers\ArrayHelper;
-use yii\web\NotFoundHttpException;
+use TaskForce\exception\TaskForceException;
 
 /**
  * Класс для обработки формы в views/tasks/index.php
@@ -21,6 +21,7 @@ class TasksSelector extends Task
     public $street;
     public $city;
     public $category;
+    public $code;
 
     public const TIME_PERIODS = [
         '1' => 'час',
@@ -32,10 +33,15 @@ class TasksSelector extends Task
      * Делает выборку новых заданий с учетом желаемых категорий и
      * времени появления заданий
      * @param Categories $categories сущность для выбора категорий в форме views/tasks/index.php
+     *
      * @return array возвращает массив выбранных новых заданий
      */
-    public static function selectTasks(Categories $categories, array $status): array
-    {
+    public static function selectTasks(
+        Categories $categories,
+        array $statuses,
+        int $limit = 3,
+        $offset = 0
+    ): array {
         $selectedCategoriesId = $categories->categoriesCheckArray;
         $additionalCondition = $categories->additionCategoryCheck;
         $period = '';
@@ -56,25 +62,28 @@ class TasksSelector extends Task
             'tasks.id',
             'tasks.name',
             'tasks.budget',
+            'description',
+            'tasks.cat_id',
             'cities.name as city',
             'locations.street as street',
             'categories.name as category',
+            'categories.code as code',
             'add_date',
         ]);
         if ($selectedCategoriesId === Categories::CATEGORIES_NOT_SELECTED) {
             if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                $query = $query->where(['in' , 'tasks.status', $status]);
+                $query = $query->where(['in' , 'tasks.status', $statuses]);
             } else {
-                $query = $query->where(['in' , 'tasks.status', $status]);
+                $query = $query->where(['in' , 'tasks.status', $statuses]);
                 $query = $query->andWhere(['contr_id' => 0]);
             }
         } else {
             if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                $query = $query->where(['in' , 'tasks.status', $status]);
+                $query = $query->where(['in' , 'tasks.status', $statuses]);
                 $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
             } else {
                 foreach ($selectedCategoriesId as $catId) {
-                    $query = $query->where(['in' , 'tasks.status', $status]);
+                    $query = $query->where(['in' , 'tasks.status', $statuses]);
                     $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
                     $query = $query->andWhere(['contr_id' => 0]);
                 }
@@ -89,7 +98,7 @@ class TasksSelector extends Task
             $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
             $query = $query->andWhere(['>', 'add_date', "$date"]);
         }
-        $query = $query->limit(3)->offset(0)->orderBy(['add_date' => SORT_DESC]);
+        $query = $query->limit($limit)->offset($offset)->orderBy(['add_date' => SORT_DESC]);
         $tasks = $query->all();
         return $tasks;
     }
@@ -99,6 +108,7 @@ class TasksSelector extends Task
      * @param $contractor исполнитель задания
      * @param string|null $taskStatuses массив требуемых статусов заданий
      * @param int|null $limit требуемый статус задания
+     *
      * @return array возвращает массив выбранных заданий
      */
     public static function selectTasksByContractor(
@@ -127,6 +137,7 @@ class TasksSelector extends Task
     /**
      * Возвращает задание с заданным id
      * @param int $taskId id задания
+     *
      * @return object возвращает искомую сущность
      */
     public static function selectTask(int $taskId): object
@@ -152,7 +163,7 @@ class TasksSelector extends Task
             innerJoin('cities', 'cities.id = locations.city_id');
         $task = $query->one();
         if ($task === null) {
-            throw new NotFoundHttpException('Задание id = ' . $taskId . ' не найдено!');
+            throw new TaskForceException('Задание id = ' . $taskId . ' не найдено!');
         }
         return $task;
     }
