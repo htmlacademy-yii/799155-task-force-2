@@ -48,7 +48,15 @@ class Registration extends User
             $user->attributes = $userData;
             if (!$user->save()) {
                 $error = Yii::$app->helpers->getFirstErrorString($user);
-                throw new TaskForceException('User error ' . $error);
+                throw new TaskForceException('Ошибка регистрации: ' . $error);
+            }
+            $user = User::findOne(['email' => $userData['email']]);
+            $profile = new Profile();
+            $profile->user_id = $user->id;
+            $profile->last_act = date("Y-m-d H:i:s");
+            if (!$profile->save()) {
+                $error = Yii::$app->helpers->getFirstErrorString($profile);
+                throw new TaskForceException('Ошибка создания профиля: ' . $error);
             }
             return true;
         }
