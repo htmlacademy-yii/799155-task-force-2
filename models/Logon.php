@@ -2,18 +2,17 @@
 
 namespace app\models;
 
-use yii\base\Model;
+use Yii;
 
-class Logon extends Model
+class Logon extends User
 {
-    public $password;
-    public $email;
-    public $user;
+    protected $user;
 
     public function rules()
     {
         return [
-            [['email', 'password'], 'required'],
+            [['password'], 'required', 'message' => 'Поле пароля не может быть пустым'],
+            [['email'], 'required', 'message' => 'Поле эл.почты не может быть пустым'],
             [['email', 'password'], 'safe'],
             [['email', 'password'], 'string', 'max' => 64],
             ['password', 'validatePassword'],
@@ -33,6 +32,7 @@ class Logon extends Model
     {
         $this->user = $user;
         if ($this->validate()) {
+            Yii::$app->user->login($user);
             return true;
         }
         return false;

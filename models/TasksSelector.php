@@ -3,8 +3,6 @@
 namespace app\models;
 
 use Yii;
-use app\models\Task;
-use app\models\Categories;
 use yii\helpers\ArrayHelper;
 use TaskForce\exception\TaskForceException;
 

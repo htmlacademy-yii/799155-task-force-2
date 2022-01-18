@@ -3,10 +3,6 @@
 namespace app\models;
 
 use Yii;
-use app\models\Reply;
-use app\models\ReviewsSelector;
-use app\models\Category;
-use app\models\Categories;
 
 class RepliesSelector extends Reply
 {

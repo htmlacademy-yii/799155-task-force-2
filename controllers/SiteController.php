@@ -9,35 +9,10 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\TasksSelector;
 use app\models\Categories;
+use app\models\User;
 
 class SiteController extends Controller
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'only' => ['logout'],
-                'rules' => [
-                    [
-                        'actions' => ['logout'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
-        ];
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -54,6 +29,14 @@ class SiteController extends Controller
         ];
     }
 
+    public function actionSite()
+    {
+        $tasks = TasksSelector::selectTasks(new Categories(), [TasksSelector::STATUS_NEW], 4, 0);
+        return $this->render('landing', [
+            'tasks' => $tasks,
+        ]);
+    }
+
     /**
      * Displays homepage.
      *
@@ -61,10 +44,13 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $tasks = TasksSelector::selectTasks(new Categories(), [TasksSelector::STATUS_NEW], 4, 0);
-        return $this->render('landing', [
-            'tasks' => $tasks,
-        ]);
+        if (is_object(Yii::$app->user)) {
+            $user = User::findIdentity(Yii::$app->user->getId());
+            if (is_object($user)) {
+                return $this->redirect(['/tasks']);
+            }
+        }
+        return $this->actionSite();
     }
 
     /**

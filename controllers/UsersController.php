@@ -10,7 +10,7 @@ use app\models\Category;
 use app\models\ReviewsSelector;
 use yii\web\NotFoundHttpException;
 
-class UsersController extends Controller
+class UsersController extends SecuredController
 {
     public function actionView(int $id)
     {

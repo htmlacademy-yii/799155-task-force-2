@@ -10,7 +10,7 @@ use app\models\TasksSelector;
 use app\models\RepliesSelector;
 use app\models\Document;
 
-class TasksController extends Controller
+class TasksController extends SecuredController
 {
     private function renderTasks(Categories $categories, array $statuses)
     {

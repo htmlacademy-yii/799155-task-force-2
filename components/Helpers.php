@@ -2,7 +2,9 @@
 
 namespace app\components;
 
+use Yii;
 use yii\base\Component;
+use app\models\User;
 
 class Helpers extends Component
 {
@@ -142,6 +144,17 @@ class Helpers extends Component
         foreach ($names as $name) {
             if (array_key_exists($name, $errors)) {
                 return $errors[$name][0];
+            }
+        }
+        return null;
+    }
+
+    public function checkAuthorization(): ?object
+    {
+        if (is_object(Yii::$app->user)) {
+            $user = User::findIdentity(Yii::$app->user->getId());
+            if (is_object($user)) {
+                return $user;
             }
         }
         return null;
