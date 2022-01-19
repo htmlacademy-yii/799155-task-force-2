@@ -156,12 +156,9 @@ class Helpers extends Component
      */
     public function checkAuthorization(): ?object
     {
-        if (is_object(Yii::$app->user)) {
-            $user = User::findIdentity(Yii::$app->user->getId());
-            if (is_object($user)) {
-                return $user;
-            }
+        if (Yii::$app->user->isGuest) {
+            return null;
         }
-        return null;
+        return User::findIdentity(Yii::$app->user->getId());
     }
 }
