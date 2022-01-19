@@ -149,6 +149,11 @@ class Helpers extends Component
         return null;
     }
 
+    /**
+     * Проверка авторизации
+     * @return object|null возвращает сущность пользователя, если
+     * он авторизован, или null в противном случае
+     */
     public function checkAuthorization(): ?object
     {
         if (is_object(Yii::$app->user)) {

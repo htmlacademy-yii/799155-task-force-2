@@ -10,9 +10,9 @@ use app\assets\AppAsset;
 AppAsset::register($this);
 
 $this->title = 'TaskForce';
-$userIsAuthorized = false;
-if (is_object(Yii::$app->user) and is_numeric(Yii::$app->user->getId())) {
-    $userIsAuthorized = true;
+$userIsAuthorized = true;
+if (Yii::$app->helpers->checkAuthorization() === null) {
+    $userIsAuthorized = false;
 }
 
 ?>
@@ -232,9 +232,6 @@ if (is_object(Yii::$app->user) and is_numeric(Yii::$app->user->getId())) {
                         </li>
                         <li class="links__item">
                             <a href="/registration">Регистрация</a>
-                        </li>
-                        <li class="links__item">
-                            <a href="/about">Справка</a>
                         </li>
                     <?php endif; ?>
                 </ul>

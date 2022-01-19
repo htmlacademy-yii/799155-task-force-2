@@ -34,13 +34,10 @@ class AuthController extends Controller
                         'allow' => true,
                         'actions' => ['logout'],
                         'matchCallback' => function ($rule, $action) {
-                            if (is_object(Yii::$app->user)) {
-                                if (is_numeric(Yii::$app->user->getId())) {
-                                    return true;
-                                }
+                            if (Yii::$app->helpers->checkAuthorization() === null) {
                                 throw new TaskForceException('Вы не авторизованы!');
                             }
-                            throw new TaskForceException('Пожалуйста, выполните вход!');
+                            return true;
                         },
                     ],
                     [

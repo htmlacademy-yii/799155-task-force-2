@@ -15,9 +15,9 @@ $urls = [
     '/registration',
     '/logon',
 ];
-$hidden = '';
-if (array_search(Url::current(), $urls) !== false) {
-    $hidden = 'hidden';
+$hidden = 'hidden';
+if (array_search(Url::current(), $urls) === false) {
+    $hidden = '';
 }
 $userName = 'Аноним';
 $user = Yii::$app->helpers->checkAuthorization();
