@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -19,7 +17,13 @@ class m211106_161636_create_cities_table extends Migration
             'name' => $this->string(32)->notNull(),
             'latitude' => $this->decimal(10, 8)->notNull(),
             'longitude' => $this->decimal(11, 8)->notNull(),
-        ])->comment('Таблица городов');
+        ]);
+
+        $this->createIndex(
+            'city_ind',
+            'cities',
+            'name'
+        );
     }
 
     /**

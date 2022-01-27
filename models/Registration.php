@@ -60,6 +60,7 @@ class Registration extends User
             $profile = new Profile();
             $profile->user_id = $user->id;
             $profile->last_act = date("Y-m-d H:i:s");
+            $profile->city = $model->city_name;
             if (!$profile->save()) {
                 $error = Yii::$app->helpers->getFirstErrorString($profile);
                 throw new TaskForceException('Ошибка создания профиля: ' . $error);

@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -18,7 +16,13 @@ class m211106_161535_create_documents_table extends Migration
             'id' => $this->primaryKey(),
             'task_id' => $this->integer()->notNull(),
             'link' => $this->string(512)->notNull(),
-        ])->comment('Таблица ссылок на дополнительные документы к заданию');
+            'size' => $this->integer()->defaultValue(0),
+        ]);
+        $this->createIndex(
+            'doc_ind',
+            'documents',
+            'task_id'
+        );
     }
 
     /**

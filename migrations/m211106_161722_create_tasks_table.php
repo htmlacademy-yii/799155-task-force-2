@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -23,11 +21,17 @@ class m211106_161722_create_tasks_table extends Migration
             'cat_id' => $this->integer()->notNull()->comment('категория задания'),
             'loc_id' => $this->integer()->notNull()->comment('локация задания'),
             'budget' => $this->integer()->notNull(),
-            'add_date' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
+            'add_date' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
             'deadline' => $this->dateTime()->notNull()->comment('срок выполнения задания'),
             'fin_date' => $this->dateTime()->null()->comment('фактический срок выполнения задания'),
             'status' => $this->string('16')->notNull()->defaultValue('new'),
-        ])->comment('Таблица заданий');
+        ]);
+        
+        $this->createIndex(
+            'task_ind',
+            'tasks',
+            'name'
+        );
     }
 
     /**

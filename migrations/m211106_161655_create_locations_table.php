@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -22,7 +20,13 @@ class m211106_161655_create_locations_table extends Migration
             'district' => $this->string(64)->null()->comment('район'),
             'street' => $this->string(64)->null()->comment('улица'),
             'info' => $this->text()->null()->comment('дополн. информация'),
-        ])->comment('Таблица мест выполнения заданий');
+        ]);
+
+        $this->createIndex(
+            'loc_ind',
+            'locations',
+            'city_id'
+        );
     }
 
     /**

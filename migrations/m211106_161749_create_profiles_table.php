@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -17,7 +15,7 @@ class m211106_161749_create_profiles_table extends Migration
         $this->createTable('{{%profiles}}', [
             'id' => $this->primaryKey(),
             'user_id' => $this->integer()->notNull(),
-            'born_date' => $this->date()->notNull(),
+            'born_date' => $this->date()->null(),
             'avatar' => $this->string(256)->null(),
             'last_act' => $this->dateTime()->null()->comment('дата последней активности'),
             'phone' => $this->string(32)->null(),
@@ -25,7 +23,14 @@ class m211106_161749_create_profiles_table extends Migration
             'social_net' => $this->string(32)->null(),
             'address' => $this->string(256)->null(),
             'about_info' => $this->text()->null()->comment('дополнительная информация о себе'),
-        ])->comment('Таблица профилей пользователей');
+            'city' => $this->string(32)->null(),
+        ]);
+        
+        $this->createIndex(
+            'profile_ind',
+            'profiles',
+            'user_id'
+        );
     }
 
     /**
