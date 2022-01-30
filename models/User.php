@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "users".
@@ -18,7 +19,7 @@ use yii\db\ActiveRecord;
  * @property Category[] $categories
  * @property UsersCategories[] $usersCategories
  */
-class User extends ActiveRecord
+class User extends ActiveRecord implements IdentityInterface
 {
     public const STATUS_FREE = 'Открыт для новых заказов';
     public const STATUS_BUSY = 'Занят';
@@ -83,5 +84,33 @@ class User extends ActiveRecord
     public function getUsersCategories()
     {
         return $this->hasMany(UsersCategories::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * реализация методов интерфейса IdentityInterface
+     */
+    public static function findIdentity($id)
+    {
+        return self::findOne($id);
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+        // TODO: Implement findIdentityByAccessToken() method.
+    }
+
+    public function getAuthKey()
+    {
+        // TODO: Implement getAuthKey() method.
+    }
+
+    public function validateAuthKey($authKey)
+    {
+        // TODO: Implement validateAuthKey() method.
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -20,10 +18,16 @@ class m211106_161813_create_replies_table extends Migration
             'contr_id' => $this->integer()->notNull()->comment('id исполнителя'),
             'price' => $this->integer()->notNull(),
             'comment' => $this->text()->null(),
-            'add_date' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
-            'rating' => $this->integer()->notNull(),
-            'status' => $this->string(16)->notNull()->comment('accepted или rejected'),
-        ])->comment('Таблица откликов исполнителей');
+            'add_date' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
+            'rating' => $this->integer()->defaultValue(0),
+            'status' => $this->string(16)->null()->comment('accepted или rejected'),
+        ]);
+
+        $this->createIndex(
+            'reply_ind',
+            'replies',
+            'add_date'
+        );
     }
 
     /**

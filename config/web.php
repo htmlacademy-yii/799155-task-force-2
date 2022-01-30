@@ -57,7 +57,17 @@ $config = [
                 'category/<id:\d+>' => 'tasks/category',
                 'logon' => 'auth/logon',
                 'registration' => 'auth/registration',
+                'logout' => 'auth/logout',
+                'site' => 'site/site',
             ],
+        ],
+    ],
+    'controllerMap' => [
+        'fixture' => [
+            'class' => 'yii\faker\FixtureController',
+            'templatePath' => '@app/fixtures/templates',
+            'fixtureDataPath' => '@app/fixtures/data',
+            'namespace' => 'app\fixtures',
         ],
     ],
     'params' => $params,

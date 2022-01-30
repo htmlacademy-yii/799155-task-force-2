@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -22,7 +20,7 @@ class m211106_153001_create_junction_table_for_users_and_categories_tables exten
             'user_id' => $this->integer(),
             'category_id' => $this->integer(),
             'PRIMARY KEY(user_id, category_id)',
-        ])->comment('Таблица связей типа многие-ко-многим пользователи-категории');
+        ]);
 
         // creates index for column `user_id`
         $this->createIndex(

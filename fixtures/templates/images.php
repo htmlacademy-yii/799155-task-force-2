@@ -6,5 +6,5 @@
  */
 return [
     'user_id' => $index + 1,
-    'img' => $faker->image(null, 640, 480, 'pictures', true),
+    'img' => $faker->file('web/img', 'data/uploads', false),
 ];

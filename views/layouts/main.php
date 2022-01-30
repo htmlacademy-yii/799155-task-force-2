@@ -6,19 +6,23 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use app\assets\AppAsset;
+use app\models\User;
 
 AppAsset::register($this);
-$initUrl = '/site/index';
-$regUrl = '/registration';
-$logUrl = '/login';
-$hidden = '';
-switch (Url::current()) {
-    case $regUrl:
-    case $logUrl:
-    case $initUrl:
-        $hidden = 'hidden';
-        break;
-    default: '';
+$urls = [
+    '/site', 
+    '/site/index',
+    '/registration',
+    '/logon',
+];
+$hidden = 'hidden';
+if (array_search(Url::current(), $urls) === false) {
+    $hidden = '';
+}
+$userName = 'Аноним';
+$user = Yii::$app->helpers->checkAuthorization();
+if ($user) {
+    $userName = $user->name;
 }
 ?>
 
@@ -55,6 +59,9 @@ switch (Url::current()) {
                     <li class="list-item">
                         <a href="#" class="link link--nav">Настройки</a>
                     </li>
+                    <li class="list-item">
+                        <a href="/site" class="link link--nav">Главная страница</a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -64,7 +71,7 @@ switch (Url::current()) {
                     width="55" height="55" alt="Аватар">
             </a>
             <div class="user-menu">
-                <p class="user-name">Василий</p>
+                <p class="user-name"><?=$userName?></p>
                 <div class="popup-head">
                     <ul class="popup-menu">
                         <li class="menu-item">
@@ -74,7 +81,7 @@ switch (Url::current()) {
                             <a href="#" class="link">Связаться с нами</a>
                         </li>
                         <li class="menu-item">
-                            <a href="#" class="link">Выход из системы</a>
+                            <a href="/logout" class="link">Выход из системы</a>
                         </li>
                     </ul>
                 </div>
@@ -84,15 +91,15 @@ switch (Url::current()) {
     <main class="main-content container">
         <?=$content; ?>
     </main>
-<?php if (Url::current() !== $initUrl) :?>
-    <footer class="footer-task">
-        <div class="container">
-            <p class="text-info">&copy; My Company <?= date('Y') ?></p>
-            <p class="text-info"><?= Yii::powered() ?></p>
-        </div>
-    </footer>
+    <?php if (Url::current() !== $urls[1] and Url::current() !== $urls[0]) :?>
+        <footer class="footer-task">
+            <div class="container">
+                <p class="text-info">&copy; My Company <?= date('Y') ?></p>
+                <p class="text-info"><?= Yii::powered() ?></p>
+            </div>
+        </footer>
+    <?php endif; ?>
   <?php $this->endBody() ?>
 </body>
 </html>
 <?php $this->endPage() ?>
-<?php endif; ?>

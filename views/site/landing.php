@@ -10,6 +10,11 @@ use app\assets\AppAsset;
 AppAsset::register($this);
 
 $this->title = 'TaskForce';
+$userIsAuthorized = true;
+if (Yii::$app->helpers->checkAuthorization() === null) {
+    $userIsAuthorized = false;
+}
+
 ?>
 
 <?php $this->beginPage() ?>
@@ -60,12 +65,18 @@ $this->title = 'TaskForce';
                <p>Работа там, где ты!</p>
             </div>
             <div class="header__account--index">
+            <?php if (!$userIsAuthorized) :?>
                 <a href="/logon" class="header__account-enter open-modal" data-for="enter-form">
                     <span>Вход</span></a>
                 или
                 <a href="/registration" class="header__account-registration">
                     Регистрация
                 </a>
+                <?php else :?>
+                    <a href="/logout" class="header__account-registration">
+                    Выход
+                </a>
+                <?php endif;?>
             </div>
         </div>
     </header>
@@ -199,24 +210,30 @@ $this->title = 'TaskForce';
             </div>
             <div class="page-footer__links">
                 <ul class="links__list">
-                    <li class="links__item">
-                        <a href="/tasks">Задания</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="/profile">Мой профиль</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="/contractors">Исполнители</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="/registration">Регистрация</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="/create">Создать задание</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="/about">Справка</a>
-                    </li>
+                    <?php if ($userIsAuthorized) :?>
+                        <li class="links__item">
+                            <a href="/tasks">Задания</a>
+                        </li>
+                        <li class="links__item">
+                            <a href="/profile">Мой профиль</a>
+                        </li>
+                        <li class="links__item">
+                            <a href="/contractors">Исполнители</a>
+                        </li>
+                        <li class="links__item">
+                            <a href="/create">Создать задание</a>
+                        </li>
+                        <li class="links__item">
+                            <a href="/logout">Выход</a>
+                        </li>
+                    <?php else :?>
+                        <li class="links__item">
+                            <a href="/logon">Вход</a>
+                        </li>
+                        <li class="links__item">
+                            <a href="/registration">Регистрация</a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
             <div class="page-footer__copyright">

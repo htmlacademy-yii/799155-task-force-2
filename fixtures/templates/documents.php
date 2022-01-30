@@ -6,6 +6,6 @@
  */
 return [
     'task_id' => $index + 1,
-    'link' => $faker->url(),
+    'link' => $faker->file('web/img', 'data/uploads', false),
     'size' => $faker->numberBetween(512, 4096),
 ];

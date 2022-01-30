@@ -15,5 +15,5 @@ return [
     'add_date' => $faker->date(),
     'deadline' => $faker->date(),
     'fin_date' => $faker->date(),
-    'status' => $faker->randomElement('new', 'done', 'refused', 'canceled'),
+    'status' => $faker->randomElement(['new', 'done', 'refused', 'canceled']),
 ];

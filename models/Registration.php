@@ -2,8 +2,6 @@
 
 namespace app\models;
 
-use app\models\User;
-use app\models\City;
 use Yii;
 use TaskForce\exception\TaskForceException;
 
@@ -15,12 +13,16 @@ class Registration extends User
     public function rules()
     {
         return [
-            [['name', 'email', 'password', 'contractor'], 'required'],
             [['name', 'email', 'password', 'password_repeaat', 'city_name', 'contractor'], 'safe'],
             [['name', 'email', 'password', 'password_repeat', 'city_name'], 'string', 'max' => 64],
-            [['email'], 'unique'],
+            [['email'], 'unique', 'message' => 'почтовый адрес должен быть уникальным'],
             [['contractor'], 'integer'],
+            [['password'], 'required', 'message' => 'Поле пароля не может быть пустым'],
+            [['password_repeat'], 'required', 'message' => 'Поле пароля не может быть пустым'],
             ['password', 'compare', 'message' => 'Оба пароля должны совпадать'],
+            [['name'], 'required', 'message' => 'Поле имени не может быть пустым'],
+            [['email'], 'required', 'message' => 'Поле эл.почты не может быть пустым'],
+            [['city_name'], 'required', 'message' => 'Поле города не может быть пустым'],
         ];
     }
     
@@ -36,6 +38,9 @@ class Registration extends User
         $request = Yii::$app->request;
         if ($request->isPost) {
             $model->load($request->post());
+            if ($model->contractor === null) {
+                    $model->contractor = '0';
+            }
             $userData = [
                 'name' => $model->name,
                 'email' => $model->email,
@@ -43,12 +48,22 @@ class Registration extends User
                 'contractor' => $model->contractor,
                 'city_id' => City::getId($cities[$model->city_name]),
             ];
-            //сохраняем в бд
+            //сохраняем данные пользователя в бд
             $user = new User();
             $user->attributes = $userData;
             if (!$user->save()) {
                 $error = Yii::$app->helpers->getFirstErrorString($user);
-                throw new TaskForceException('User error ' . $error);
+                throw new TaskForceException('Ошибка регистрации: ' . $error);
+            }
+            //создадим профиль пользователя (пока пустой)
+            $user = User::findOne(['email' => $userData['email']]);
+            $profile = new Profile();
+            $profile->user_id = $user->id;
+            $profile->last_act = date("Y-m-d H:i:s");
+            $profile->city = $model->city_name;
+            if (!$profile->save()) {
+                $error = Yii::$app->helpers->getFirstErrorString($profile);
+                throw new TaskForceException('Ошибка создания профиля: ' . $error);
             }
             return true;
         }

@@ -13,5 +13,6 @@ return [
     'messenger' => null,
     'social_net' => null,
     'address' => $faker->address(),
-    'about_info' => $faker->sentence(7, true),  // generate a sentence with 7 words
+    'about_info' => $faker->sentence(7, true), // generate a sentence with 7 words
+    'city' => $faker->city(),
 ];

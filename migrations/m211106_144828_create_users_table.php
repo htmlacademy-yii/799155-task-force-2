@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -19,10 +17,16 @@ class m211106_144828_create_users_table extends Migration
             'name' => $this->string(64)->notNull(),
             'email' => $this->string(64)->notNull()->unique(),
             'password' => $this->string(64)->notNull(),
-            'add_date' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
+            'add_date' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
             'contractor' => $this->tinyInteger(3)->defaultValue(0)->comment('исполнитль или заказчик'),
             'city_id' => $this->integer()->defaultValue(0)->comment('id города'),
-        ])->comment('Таблица пользователей');
+        ]);
+
+        $this->createIndex(
+            'user_ind',
+            'users',
+            'email'
+        );
     }
 
     /**

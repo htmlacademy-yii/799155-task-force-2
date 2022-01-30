@@ -2,7 +2,9 @@
 
 namespace app\components;
 
+use Yii;
 use yii\base\Component;
+use app\models\User;
 
 class Helpers extends Component
 {
@@ -145,5 +147,18 @@ class Helpers extends Component
             }
         }
         return null;
+    }
+
+    /**
+     * Проверка авторизации
+     * @return object|null возвращает сущность пользователя, если
+     * он авторизован, или null в противном случае
+     */
+    public function checkAuthorization(): ?object
+    {
+        if (Yii::$app->user->isGuest) {
+            return null;
+        }
+        return User::findIdentity(Yii::$app->user->getId());
     }
 }

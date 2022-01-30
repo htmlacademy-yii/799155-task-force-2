@@ -2,9 +2,6 @@
 
 namespace app\models;
 
-use app\models\Review;
-use app\models\TasksSelector;
-
 class ReviewsSelector extends Review
 {
     public $avatar; //аватар заказчика-автора отзыва

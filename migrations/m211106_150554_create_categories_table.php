@@ -1,7 +1,5 @@
 <?php
 
-namespace app\migrations;
-
 use yii\db\Migration;
 
 /**
@@ -19,7 +17,13 @@ class m211106_150554_create_categories_table extends Migration
             'name' => $this->string(64)->notNull(),
             'code' => $this->string(64)->notNull()->unique(),
             'icon' => $this->string(256)->null(),
-        ])->comment('Таблица категорий');
+        ]);
+
+        $this->createIndex(
+            'code_ind',
+            'categories',
+            'code'
+        );
     }
 
     /**
