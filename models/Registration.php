@@ -25,7 +25,7 @@ class Registration extends User
             [['city_name'], 'required', 'message' => 'Поле города не может быть пустым'],
         ];
     }
-    
+
     /**
      * Регистрация подьзователя
      * @param Registration $model данные формы регистрации

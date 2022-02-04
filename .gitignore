@@ -5,6 +5,12 @@
 *.psd
 *.sublime*
 
+#upload files
+/web/uploads
+
+#fixtures data files
+/fixtures/data
+
 # vendorstorm project files
 .idea
 

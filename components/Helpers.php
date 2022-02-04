@@ -4,6 +4,8 @@ namespace app\components;
 
 use Yii;
 use yii\base\Component;
+use yii\web\UploadedFile;
+use yii\helpers\FileHelper;
 use app\models\User;
 
 class Helpers extends Component
@@ -79,10 +81,11 @@ class Helpers extends Component
      * Возвращает строку-дата в виде 01 января 2021, 14:00
      *
      * @param string $strDate дата в стоковом формате
+     * @param bool $hours true, если нужны еще и часы:минуты
      *
      * @return string дата с названием месяца на русском языке
     */
-    public function ruDate($strDate): string
+    public function ruDate(string $strDate, bool $hours = false): string
     {
         $date = new \DateTime($strDate);
         // номер месяца
@@ -91,7 +94,8 @@ class Helpers extends Component
             'Января', 'Февраля', 'Марта', 'Апреля', 'Майя', 'Июня', 'Июля',
             'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'
             ];
-        return $date->format("d $months[$index] Y, H:i");
+        $format = "d $months[$index] Y" . ($hours ? ", H:i" : "");
+        return $date->format($format);
     }
 
     /**
@@ -160,5 +164,49 @@ class Helpers extends Component
             return null;
         }
         return User::findIdentity(Yii::$app->user->getId());
+    }
+
+    /**
+     * Проверка валидности загруженного на сервер файла
+     * @param UploadedFile $file данные о загруженном файле
+     * @return bool результат валидации
+     */
+    public function validateUploadedFile(UploadedFile $file, array $mimeTypes): bool
+    {
+        $errMsg = 'Ошибка загрузки файла: ';
+        switch ($file->error) {
+            case UPLOAD_ERR_OK:
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                throw new \RuntimeException($errMsg . 'файл не был отправлен.');
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                throw new \RuntimeException($errMsg . 'превышен размер файла.');
+            default:
+                throw new \RuntimeException($errMsg . 'другие ошибки.');
+        }
+        if ($file->size > 1000000) {
+            throw new \RuntimeException($errMsg . 'превышен размер файла.');
+        }
+        $mimeType = FileHelper::getMimeType($file->tempName);
+        if (in_array($mimeType, $mimeTypes)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Укорачивает имя файла до 30 символов, сохраняя расширение
+     * @param string $fname имя файла
+     * @return string укороченное имя файла
+     */
+    function shortenFileName(string $fname): string
+    {
+        if (strlen($fname) < 31) {
+            return $fname;
+        }
+        $ext = substr($fname, strpos($fname, '.'), 5);
+        $shortName = substr($fname, 0, 20) . '... ' . $ext;
+        return $shortName;
     }
 }
