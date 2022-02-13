@@ -12,7 +12,8 @@ use app\models\Task;
 <div class="left-column">
     <div class="head-wrapper">
         <h3 class="head-main"><?=Html::encode($task->name)?></h3>
-        <p class="price price--big"><?=Html::encode($task->budget)?> ₽</p>
+        <p class="price price--big" <?=empty($task->budget) ? 'hidden' : ''?>>
+            <?=Html::encode($task->budget)?> ₽</p>
     </div>
     <p class="task-description">
         <?=Html::encode($task->description)?>
@@ -22,7 +23,7 @@ use app\models\Task;
     <?php elseif ($task->status === Task::STATUS_ON_DEAL) :?>
         <a href="#" class="button button--blue">Отказаться от задания</a>
     <?php endif; ?>
-    <div class="task-map">
+    <div class="task-map" <?=empty($task->city) ? 'hidden' : '';?>>
         <img class="map" src=<?=Url::to('/img/map.png', true);?> width="725" height="346" alt="Адрес задания">
         <p class="map-address town"><?=Html::encode($task->city)?></p>
         <p class="map-address"><?=Html::encode($task->street)?></p>
@@ -30,7 +31,7 @@ use app\models\Task;
     <h4 class="head-regular">Отклики на задание</h4>
     <?php foreach ($replies as $reply) : ?>
         <div class="response-card">
-            <img class="customer-photo" src=<?=Url::to($reply->avatar, true);?>
+            <img class="customer-photo" src=<?=Url::to(Html::encode($reply->avatar), true);?>
                 width="146" height="156" alt="Фото заказчиков">
             <div class="feedback-wrapper">
                 <a href="<?='/user/' . $reply->contr_id?>" class="link link--block link--big">
@@ -48,13 +49,12 @@ use app\models\Task;
                 <p class="response-message">
                     <?=$reply->comment?>
                 </p>
-
             </div>
             <div class="feedback-wrapper">
                 <p class="info-text"><span class="current-time">
                     <?=Yii::$app->helpers->getTimeStr(Html::encode($reply->add_date))?></span>
                 </p>
-                <p class="price price--small"><?=$reply->price . ' ₽'?></p>
+                <p class="price price--small"><?=Html::encode($reply->price) . ' ₽'?></p>
             </div>
             <div class="button-popup">
                 <a href="#" class="button button--blue button--small">Принять</a>
@@ -86,7 +86,8 @@ use app\models\Task;
         <ul class="enumeration-list">
             <?php foreach ($docs as $doc) :?>
                 <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip"><?=$doc->link?></a>
+                <a href="#" class="link link--block link--clip">
+                        <?=Yii::$app->helpers->shortenFileName($doc->doc);?></a>
                 <p class="file-size"><?=$doc->size?> Кб</p>
             </li>
             <?php endforeach;?>

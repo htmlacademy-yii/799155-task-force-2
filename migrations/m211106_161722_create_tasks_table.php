@@ -26,7 +26,7 @@ class m211106_161722_create_tasks_table extends Migration
             'fin_date' => $this->dateTime()->null()->comment('фактический срок выполнения задания'),
             'status' => $this->string('16')->notNull()->defaultValue('new'),
         ]);
-        
+
         $this->createIndex(
             'task_ind',
             'tasks',

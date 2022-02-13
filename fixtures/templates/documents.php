@@ -4,8 +4,10 @@
  * @var $faker \Faker\Generator
  * @var $index integer
  */
+$ext = $faker->randomElement(['doc', 'txt', 'docx']);
 return [
     'task_id' => $index + 1,
-    'link' => $faker->file('web/img', 'data/uploads', false),
+    'fname' => 'upload' . $faker->randomNumber() . '.' . $ext,
     'size' => $faker->numberBetween(512, 4096),
+    'doc' => $faker->word() . '.' . $ext,
 ];

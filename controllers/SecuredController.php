@@ -1,4 +1,5 @@
 <?php
+
 namespace app\controllers;
 
 use Yii;
@@ -36,8 +37,7 @@ abstract class SecuredController extends Controller
      */
     public function beforeAction($action)
     {
-        if (Yii::$app->helpers->checkAuthorization() === null)
-        {
+        if (Yii::$app->helpers->checkAuthorization() === null) {
             $this->redirect('/site');
             return false;
         }

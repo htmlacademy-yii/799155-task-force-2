@@ -25,7 +25,7 @@ class m211106_161749_create_profiles_table extends Migration
             'about_info' => $this->text()->null()->comment('дополнительная информация о себе'),
             'city' => $this->string(32)->null(),
         ]);
-        
+
         $this->createIndex(
             'profile_ind',
             'profiles',

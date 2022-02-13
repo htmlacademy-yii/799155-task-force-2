@@ -11,4 +11,5 @@ return [
     'district' => null,
     'street' => $faker->streetName(),
     'info' => $faker->sentence(5, true),
+    'task_id' => $faker->numberBetween(1, 10),
 ];

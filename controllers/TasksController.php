@@ -9,6 +9,9 @@ use app\models\Categories;
 use app\models\TasksSelector;
 use app\models\RepliesSelector;
 use app\models\Document;
+use app\models\Task;
+use yii\web\ForbiddenHttpException;
+use yii\web\UploadedFile;
 
 class TasksController extends SecuredController
 {
@@ -54,5 +57,36 @@ class TasksController extends SecuredController
         $categories = new Categories();
         $categories->categoriesCheckArray = [$id];
         return $this->renderTasks($categories, [TasksSelector::STATUS_NEW]);
+    }
+
+    public function actionAddTask()
+    {
+        $categories = Category::getCategoryNames();
+        $model = new Task();
+        if (Yii::$app->request->isPost) {
+            $model->load(Yii::$app->request->post());
+            $model->cat_id = Category::getId($categories[$model->category]);
+            $model->files = UploadedFile::getInstances($model, 'files');
+            if ($model->validate()) {
+                if ($model->saveTask()) {
+                    return $this->redirect(['/task/' . $model->id]);
+                }
+            }
+        }
+        return $this->render('add-task', [
+            'model' => $model,
+            'categories' => $categories,
+        ]);
+    }
+
+    public function beforeAction($action)
+    {
+        if ($action->id === 'add-task') {
+            $user = Yii::$app->helpers->checkAuthorization();
+            if ($user->contractor === 1) {
+                throw new ForbiddenHttpException('Создание заданий разрешено только заказчикам!');
+            }
+        }
+        return parent::beforeAction($action);
     }
 }

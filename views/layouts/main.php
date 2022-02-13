@@ -10,11 +10,18 @@ use app\models\User;
 
 AppAsset::register($this);
 $urls = [
-    '/site', 
+    '/site',
     '/site/index',
     '/registration',
     '/logon',
 ];
+$urlAdd = '/add-task';
+$hideAddTaskItem = '';
+$classMod = '';
+if (Url::current() === $urlAdd) {
+    $hideAddTaskItem = 'hidden';
+    $classMod = 'main-content--center';
+}
 $hidden = 'hidden';
 if (array_search(Url::current(), $urls) === false) {
     $hidden = '';
@@ -53,8 +60,8 @@ if ($user) {
                     <li class="list-item">
                         <a href="#" class="link link--nav">Мои задания</a>
                     </li>
-                    <li class="list-item">
-                        <a href="#" class="link link--nav">Создать задание</a>
+                    <li class="list-item" <?=$hideAddTaskItem?>>
+                        <a href="/add-task" class="link link--nav">Создать задание</a>
                     </li>
                     <li class="list-item">
                         <a href="#" class="link link--nav">Настройки</a>
@@ -88,7 +95,7 @@ if ($user) {
             </div>
         </div>
     </header>
-    <main class="main-content container">
+    <main class="main-content container <?=$classMod?>">
         <?=$content; ?>
     </main>
     <?php if (Url::current() !== $urls[1] and Url::current() !== $urls[0]) :?>

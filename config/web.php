@@ -59,6 +59,7 @@ $config = [
                 'registration' => 'auth/registration',
                 'logout' => 'auth/logout',
                 'site' => 'site/site',
+                'add-task' => 'tasks/add-task',
             ],
         ],
     ],

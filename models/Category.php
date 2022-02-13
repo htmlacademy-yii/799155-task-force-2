@@ -96,12 +96,19 @@ class Category extends ActiveRecord
      */
     public static function getName(int $id): string
     {
-        $cat = self::find()->select([
-            'name'
-        ])->where(['id' => $id])->one();
+        $cat = self::findOne(['id' => $id]);
         if (!$cat) {
             throw new TaskForceException('Категория с id= ' . $id . ' нет в БД');
         }
         return $cat->name;
+    }
+
+    public static function getId(string $name): int
+    {
+        $cat = self::findOne(['name' => $name]);
+        if (!$cat) {
+            throw new TaskForceException('Категории ' . $name . ' нет в БД');
+        }
+        return $cat->id;
     }
 }

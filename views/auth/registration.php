@@ -12,11 +12,16 @@ use yii\widgets\ActiveField;
 
 <div class="center-block container--registration">
     <div class="regular-form">
-        <?php $form = ActiveForm::begin(['id' => 'registration-form', 'options' => ['class' => 'registration-form']]); ?>
+        <?php $form = ActiveForm::begin([
+            'id' => 'registration-form',
+            'options' => ['class' => 'registration-form']
+            ]); ?>
             <h3 class="head-main head-task">Регистрация нового пользователя</h3>
             <div class="form-group">
                 <?php
-                echo $form->field($model, 'name',
+                echo $form->field(
+                    $model,
+                    'name',
                     [
                         'labelOptions' => [
                             'class' => 'control-label',
@@ -28,7 +33,9 @@ use yii\widgets\ActiveField;
             <div class="half-wrapper">
                 <div class="form-group">
                     <?php
-                    echo $form->field($model, 'email',
+                    echo $form->field(
+                        $model,
+                        'email',
                         [
                             'labelOptions' => [
                                 'class' => 'control-label',
@@ -57,24 +64,28 @@ use yii\widgets\ActiveField;
             </div>
             <div class="form-group">
                 <?php
-                echo $form->field($model, 'password_repeat',
-                    [
-                        'labelOptions' => [
-                            'class' => 'control-label',
-                        ],
-                    ]
-                )->input('password')->hint('Введите пароль')->label('Пароль');
+                    echo $form->field(
+                        $model,
+                        'password_repeat',
+                        [
+                            'labelOptions' => [
+                                'class' => 'control-label',
+                            ],
+                        ]
+                    )->input('password')->hint('Введите пароль')->label('Пароль');
                     ?>
             </div>
             <div class="form-group">
                 <?php
-                echo $form->field($model, 'password',
-                    [
-                        'labelOptions' => [
-                            'class' => 'control-label',
-                        ],
-                    ]
-                )->input('password')->hint('Повторите пароль')->label('Пароль');
+                    echo $form->field(
+                        $model,
+                        'password',
+                        [
+                            'labelOptions' => [
+                                'class' => 'control-label',
+                            ],
+                        ]
+                    )->input('password')->hint('Повторите пароль')->label('Пароль');
                     ?>
             </div>
             <div class="form-group">
