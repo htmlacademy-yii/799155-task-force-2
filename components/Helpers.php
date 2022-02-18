@@ -116,7 +116,7 @@ class Helpers extends Component
      * @param string $mask маска номера, в кторой символ # будет заменён на
      * очередной символ из $number
      * @param string $number строка с цифрами телефонного номера
-     * 
+     *
      * @return string строка с телефонным номером
      */
     public function translatePhoneNumber(string $mask, string $number): string
@@ -137,8 +137,8 @@ class Helpers extends Component
 
     /**
      * Возращает первую строку с описанием ошибки
-     * @param ActiveRecord $model 
-     * 
+     * @param ActiveRecord $model
+     *
      * @return string|null первая же строка с описанием ошибки из массива $errors
      */
     public function getFirstErrorString($model): ?string
@@ -200,7 +200,7 @@ class Helpers extends Component
      * @param string $fname имя файла
      * @return string укороченное имя файла
      */
-    function shortenFileName(string $fname): string
+    public function shortenFileName(string $fname): string
     {
         if (strlen($fname) < 31) {
             return $fname;

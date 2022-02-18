@@ -56,7 +56,7 @@ class ReviewsSelector extends Review
      */
     public static function getReviews(int $userId, array $taskStatuses = null, int $limit = null)
     {
-        $tasks = TasksSelector::selectTasksByContractor($userId, $taskStatuses);
+        $tasks = TasksSelector::selectTasksByStatus($userId, $taskStatuses);
         $reviews = [];
         foreach ($tasks as $task) {
             $review = self::selectReview($userId, $task);
@@ -83,7 +83,7 @@ class ReviewsSelector extends Review
             return array(0, 0);
         }
         //проваленные задания
-        $refusedTasks = TasksSelector::selectTasksByContractor($userId, [TasksSelector::STATUS_REFUSED]);
+        $refusedTasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_REFUSED]);
         $refusedCount = count($refusedTasks);
         $score = array_reduce($reviews, function ($result, $item) {
             $result += $item->rating;
@@ -91,6 +91,23 @@ class ReviewsSelector extends Review
         }, 0);
 
         $rating = $score / (count($reviews) + $refusedCount);
+        $rating = $rating > 5 ? 5 : $rating + 0;
         return array(count($reviews), $rating);
+    }
+
+    public function saveReview($taskId, $userId): bool
+    {
+        $review = self::findOne(['task_id' => $taskId, 'custom_id' => $userId]);
+        if (!$review) {
+            $review = new Review();
+            $review->comment = $this->comment;
+            $review->task_id = $taskId;
+            $review->add_date = date("Y-m-d H:i:s");
+            $review->custom_id = $userId;
+            $review->contr_id = Task::findOne($taskId)->contr_id;
+            $review->rating = $this->rating;
+            return $review->save();
+        }
+        return false;
     }
 }

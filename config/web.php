@@ -12,6 +12,25 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+        'log' => [
+            'traceLevel' => YII_DEBUG ? 3 : 0,
+            'flushInterval' => 1,
+            'targets' => [
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['error', 'warning', 'info'],
+                    'maxLogFiles' => 2,
+                    'exportInterval' => 1,
+                    'logVars' => ['_GET', '_POST']
+                ],
+                [
+                    'class' => 'yii\log\FileTarget', //в файл
+                    'categories' => ['controllers'], //категория логов
+                    'logFile' => '@runtime/logs/controllers.log', //куда сохранять
+                    'logVars' => [] //не добавлять в лог глобальные переменные ($_SERVER, $_SESSION...)
+                ],
+            ],
+        ],
         'helpers' => [
             'class' => 'app\components\Helpers',
         ],
@@ -53,6 +72,7 @@ $config = [
             'enableStrictParsing' => false,
             'rules' => [
                 'task/<id:\d+>' => 'tasks/view',
+                'my-tasks/<code:\w+>' => 'tasks/my-tasks',
                 'user/<id:\d+>' => 'users/view',
                 'category/<id:\d+>' => 'tasks/category',
                 'logon' => 'auth/logon',
@@ -60,6 +80,11 @@ $config = [
                 'logout' => 'auth/logout',
                 'site' => 'site/site',
                 'add-task' => 'tasks/add-task',
+                'accept/<id:\d+>' => 'tasks/accept',
+                'reject/<id:\d+>' => 'tasks/reject',
+                'edit-profile/<id:\d+>' => 'users/edit-profile',
+                'cancel/<id:\d+>' => 'tasks/cancel',
+
             ],
         ],
     ],

@@ -10,6 +10,6 @@ return [
     'price' => $faker->numberBetween(1999, 3100),
     'comment' => $faker->realText($maxNbChars = 200, $indexSize = 2),
     'add_date' => $faker->date(),
-    'rating' => $faker->numberBetween(3, 10),
+    'reviews' => $faker->numberBetween(0, 10),
     'status' => null,
 ];
