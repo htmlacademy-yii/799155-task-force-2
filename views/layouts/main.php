@@ -34,7 +34,7 @@ if (Url::current() === $urlAdd) {
 }
 $hidden = 'hidden';
 $res = array_reduce($urls, function ($out, $url) {
-    return $out += strstr(Url::current(), $url) === false ? 0 : 1; 
+    return $out += strstr(Url::current(), $url) === false ? 0 : 1;
 }, 0);
 if ($res === 0) {
     $hidden = '';
@@ -42,7 +42,7 @@ if ($res === 0) {
 //наличие модального окна каким-то образом меняет стили в верстке
 //поэтому приходится отслеживать наличие на странице модального окна
 $modal = array_reduce($urlsWhithModal, function ($out, $url) {
-    return $out += strstr(Url::current(), $url) === false ? 0 : 1; 
+    return $out += strstr(Url::current(), $url) === false ? 0 : 1;
 }, 0);
 
 $userName = 'Аноним';
