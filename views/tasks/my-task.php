@@ -2,6 +2,7 @@
 
 use app\models\Task;
 use yii\helpers\Url;
+use yii\helpers\Html;
 
 ?>
 
@@ -21,16 +22,18 @@ use yii\helpers\Url;
     <?php foreach ($tasks as $task) :?>
     <div class="task-card">
             <div class="header-task">
-            <a  href=<?='/task/' . $task->id?> class="link link--block link--big"><?=$task->name?></a>
-            <p class="price price--task"><?=$task->budget . ' ₽'?></p>
+            <a href=<?='/task/' . $task->id?>
+                class="link link--block link--big"><?=Html::encode($task->name)?></a>
+            <p class="price price--task"><?=Html::encode($task->budget) . ' ₽'?></p>
         </div>
-        <p class="info-text"><span class="current-time">4 часа </span>назад</p>
-        <p class="task-text"><?=$task->description?></p>
+        <p class="info-text"><span class="current-time">
+            <?=Yii::$app->helpers->getTimeStr(Html::encode($task->add_date));?></span></p>
+        <p class="task-text"><?=Html::encode($task->description)?></p>
         <div class="footer-task">
             <?php if (!empty($task->city)) :?>
-            <p class="info-text town-text"><?=$task->city?></p>
+            <p class="info-text town-text"><?=Html::encode($task->city)?></p>
             <?php endif;?>
-            <p class="info-text category-text"><?=$task->category?></p>
+            <p class="info-text category-text"><?=Html::encode($task->category)?></p>
             <a href=<?='/task/' . $task->id?> class="button button--black">Смотреть задание</a>
         </div>
     </div>

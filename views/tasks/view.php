@@ -147,9 +147,9 @@ foreach ($replies as $reply) {
                 </div>
                 <div class="feedback-wrapper">
                     <p class="info-text"><span class="current-time">
-                        <?=Yii::$app->helpers->getTimeStr(Html::encode($reply->add_date))?></span>
+                        <?=Yii::$app->helpers->getTimeStr(Html::encode($reply->add_date));?></span>
                     </p>
-                    <p class="price price--small"><?=$reply->price . ' ₽'?></p>
+                    <p class="price price--small"><?=$reply->price . ' ₽';?></p>
                 </div>
                 <!-- если активный пользователь - заказчик, рисуем для него кнопки -->
                 <?php if ($task->custom_id === $user->id and $reply->status === Reply::STATUS_PROPOSAL) :?>
