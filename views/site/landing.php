@@ -11,7 +11,8 @@ AppAsset::register($this);
 
 $this->title = 'TaskForce';
 $userIsAuthorized = true;
-if (Yii::$app->helpers->checkAuthorization() === null) {
+$user = Yii::$app->helpers->checkAuthorization();
+if ($user === null) {
     $userIsAuthorized = false;
 }
 
@@ -271,13 +272,13 @@ if (Yii::$app->helpers->checkAuthorization() === null) {
                 <ul class="links__list">
                     <?php if ($userIsAuthorized) :?>
                         <li class="links__item">
-                            <a href="/tasks">Задания</a>
+                            <a href="/tasks">Все задания</a>
                         </li>
                         <li class="links__item">
-                            <a href="/profile">Мой профиль</a>
+                            <a href=<?='/edit-profile/' . $user->id;?>>Мой профиль</a>
                         </li>
                         <li class="links__item">
-                            <a href="/contractors">Исполнители</a>
+                            <a href="/my-tasks/new">Мои задания</a>
                         </li>
                         <li class="links__item">
                             <a href="/add-task">Создать задание</a>

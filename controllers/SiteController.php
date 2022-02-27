@@ -31,7 +31,7 @@ class SiteController extends Controller
 
     public function actionSite()
     {
-        $tasks = TasksSelector::selectTasks(new Categories(), [TasksSelector::STATUS_NEW], 4, 0);
+        $tasks = TasksSelector::selectTasks(new Categories(), [TasksSelector::STATUS_NEW], 0, 4, 0);
         return $this->render('landing', [
             'tasks' => $tasks,
         ]);

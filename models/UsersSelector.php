@@ -23,6 +23,7 @@ class UsersSelector extends User
     public $position; //положение в рейтинге
     public $phone;
     public $messenger;
+    public $categories;
 
     /**
      * Возвращает пользователя с заданным id
@@ -71,7 +72,12 @@ class UsersSelector extends User
         }, $users);
         arsort($positions);
         $user->position = array_search($user->rating, array_values($positions)) + 1;
-        $user->phone = Yii::$app->helpers->translatePhoneNumber('+# (###) ###-##-##', $user->phone);
+        if ($user->phone) {
+            $user->phone = Yii::$app->helpers->translatePhoneNumber('+# (###) ###-##-##', $user->phone);
+        }
+        $profile = Profile::findOne(['user_id' => $userId]);
+        $categoryIds = ProfileData::decodeCategories($profile->categories);
+        $user->categories = Category::find()->select(['id', 'name'])->where(['in', 'id', $categoryIds])->all();
         return $user;
     }
 }

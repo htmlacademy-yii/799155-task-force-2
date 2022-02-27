@@ -4,19 +4,26 @@
 /* @var $tasks массив заданий*/
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\ActiveField;
 use app\models\Categories;
 
+$urls = [
+    '/tasks/index' => 'Новые задания',
+    '/my-tasks' => 'Мои задания',
+];
+
 ?>
 <div class="left-column">
-    <h3 class="head-main head-task">Новые задания</h3>
+    <h3 class="head-main head-task"><?=$urls[Url::current()]?></h3>
     <?php foreach ($tasks as $task) : ?>
         <div class="task-card">
         <div class="header-task">
-            <a  href=<?='/task/' . $task->id?> class="link link--block link--big">
-                <?=Html::encode($task->name)?></a>
-            <p class="price price--task"><?=Html::encode($task->budget)?> ₽</p>
+            <a  href=<?='/task/' . $task->id?> class="link link--block link--big"><?=Html::encode($task->name)?></a>
+            <?php if (!empty($task->budget)) :?>
+                <p class="price price--task"><?=Html::encode($task->budget)?> ₽</p>
+            <?php endif;?>
         </div>
         <p class="info-text"><span class="current-time">
             <?=Yii::$app->helpers->getTimeStr(Html::encode($task->add_date))?></span>
@@ -24,10 +31,9 @@ use app\models\Categories;
         <p class="task-text"><?=Html::encode($task->description)?>
         </p>
         <div class="footer-task">
-            <p class="info-text town-text" <?=empty($task->city) ? 'hidden' : ''?>>
-                <?=Html::encode($task->city . ', ' . $task->street)?></p>
+            <p class="info-text town-text"><?=Html::encode($task->city . ', ' . $task->street)?></p>
             <p class="info-text category-text"><?=Html::encode($task->category)?></p>
-            <a href=<?='/task/' . $task->id?> class="button button--black">Смотреть Задание</a>
+            <a href=<?='/task/' . $task->id?> class="button button--black">Смотреть задание</a>
         </div>
     </div>
     <?php endforeach; ?>

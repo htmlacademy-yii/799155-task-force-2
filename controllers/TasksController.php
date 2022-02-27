@@ -6,18 +6,24 @@ use Yii;
 use yii\web\Controller;
 use app\models\Category;
 use app\models\Categories;
+use app\models\Reply;
 use app\models\TasksSelector;
 use app\models\RepliesSelector;
+use app\models\ReviewsSelector;
 use app\models\Document;
 use app\models\Task;
+use app\models\User;
+use app\models\Location;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+use TaskForce\logic\Action;
 
 class TasksController extends SecuredController
 {
-    private function renderTasks(Categories $categories, array $statuses)
+    private function renderTasks(Categories $categories, array $statuses, int $userId = 0)
     {
-        $tasks = TasksSelector::selectTasks($categories, $statuses);
+        $tasks = TasksSelector::selectTasks($categories, $statuses, $userId);
         $categoryNames[Categories::MAIN_CATEGORIES] = Category::getCategoryNames();
         $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
         $categoryNames[Categories::PERIODS] = array_map(
@@ -40,15 +46,73 @@ class TasksController extends SecuredController
         return $this->renderTasks($categories, [TasksSelector::STATUS_NEW]);
     }
 
+    public function acceptReply($reply)
+    {
+        //меняем статус отклика на принято
+        $model = Reply::findOne(['id' => $reply->id]);
+        $model->status = Reply::STATUS_ACCEPTED;
+        $model->update();
+        //стартуем задание
+        $task = Task::findOne(['id' => $reply->task_id]);
+        if (Action::doAction(Action::ACTION_START, $task, $this->user->id)) {
+            $task->contr_id = $model->contr_id;
+            if ($task->update() === false) {
+                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+            }
+        }
+    }
+
+    public function rejectReply($reply)
+    {
+        //меняем статус отклика на отказано
+        $model = Reply::findOne(['id' => $reply->id]);
+        $model->status = Reply::STATUS_REJECTED;
+        $model->update();
+    }
+
     public function actionView(int $id)
     {
         $task = TasksSelector::selectTask($id);
+        $reply = new RepliesSelector();
+        $review = new ReviewsSelector();
+        if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->post('reply') === 'ok') {
+                $reply->load(Yii::$app->request->post());
+                if (!$reply->saveReply($task->id, $this->user->id)) {
+                    $message = [
+                        'post' => Yii::$app->request->post(),
+                        'info' => Yii::$app->helpers->getFirstErrorString($reply),
+                    ];
+                    Yii::trace($message, 'controllers');
+                    return $this->refresh();
+                }
+            }
+            if (Yii::$app->request->post('refuse') === 'ok') {
+                $reply->load(Yii::$app->request->post());
+                return $this->actionRefuse($task->id, $reply);
+            }
+            if (Yii::$app->request->post('review') === 'ok') {
+                $review->load(Yii::$app->request->post());
+                if (!$review->saveReview($task->id, $this->user->id)) {
+                    $message = [
+                        'post' => Yii::$app->request->post(),
+                        'info' => Yii::$app->helpers->getFirstErrorString($review),
+                    ];
+                    Yii::trace($message, 'controllers');
+                    return $this->refresh();
+                } else {
+                    return $this->actionDone($task->id);
+                }
+            }
+        }
         $replies = RepliesSelector::selectRepliesByTask($task->id);
         $docs = Document::selectDocuments($id);
         return $this->render('view', [
             'task' => $task,
             'replies' => $replies,
             'docs' => $docs,
+            'reply' => $reply,
+            'review' => $review,
         ]);
     }
 
@@ -62,7 +126,7 @@ class TasksController extends SecuredController
     public function actionAddTask()
     {
         $categories = Category::getCategoryNames();
-        $model = new Task();
+        $model = new TasksSelector();
         if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
             $model->cat_id = Category::getId($categories[$model->category]);
@@ -81,12 +145,129 @@ class TasksController extends SecuredController
 
     public function beforeAction($action)
     {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
         if ($action->id === 'add-task') {
-            $user = Yii::$app->helpers->checkAuthorization();
-            if ($user->contractor === 1) {
+            if ($this->user->contractor === 1) {
                 throw new ForbiddenHttpException('Создание заданий разрешено только заказчикам!');
             }
         }
-        return parent::beforeAction($action);
+        return true;
+    }
+
+    /**
+     * Принять отклик исполнителя
+     * @param int $id id отклика исполнителя
+     */
+    public function actionAccept(int $id)
+    {
+        $reply = Reply::findOne(['id' => $id]);
+        $this->acceptReply($reply);
+        return $this->actionView($reply->task_id);
+    }
+
+    /**
+     * Отклонить отклик исполнителя
+     * @param int $id id отклика исполнителя
+     */
+    public function actionReject(int $id)
+    {
+        $reply = Reply::findOne(['id' => $id]);
+        $this->rejectReply($reply);
+        return $this->actionView($reply->task_id);
+    }
+
+    /**
+     * Выолнить отказ от задания
+     * @param int $id id задания
+     */
+    public function actionRefuse(int $taskId, RepliesSelector $reply)
+    {
+        $task = Task::findOne($taskId);
+        $contr = User::findOne($task->contr_id);
+        if ($this->user->id !== $contr->id) {
+            throw new ForbiddenHttpException('Вы не являетесь исполнителем этого задания!');
+        }
+        $model = Reply::findOne(['contr_id' => $task->contr_id]);
+        $model->status = Reply::STATUS_REFUSED;
+        $model->comment = $reply->comment;
+        $model->update();
+        if (Action::doAction(Action::ACTION_REFUSE, $task, $contr->id)) {
+            if ($task->update() === false) {
+                $message = [
+                    'controller id' => 'refuse',
+                    'task' => $task,
+                    'info' => Yii::$app->helpers->getFirstErrorString($task),
+                ];
+                Yii::trace($message, 'controllers');
+            }
+        }
+        return $this->refresh();
+    }
+
+    /**
+     * Выполнить отмену задания
+     * @param int $id id задания
+     */
+    public function actionCancel(int $id)
+    {
+        $task = Task::findOne($id);
+        $custom = User::findOne($task->custom_id);
+        if ($this->user->id !== $custom->id) {
+            throw new ForbiddenHttpException('У Вас нет прав отменить это задание!');
+        }
+
+        if (Action::doAction(Action::ACTION_CANCEL, $task, $custom->id)) {
+            if ($task->update() === false) {
+                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+            }
+        }
+        return $this->redirect(['/task/' . $id]);
+    }
+
+    /**
+     * Отметить задание выполненным
+     * @param int $id id задания
+     */
+    public function actionDone(int $id)
+    {
+        $task = Task::findOne($id);
+        $custom = User::findOne($task->custom_id);
+        if ($this->user->id !== $custom->id) {
+            throw new ForbiddenHttpException('Вы не являетесь заказчиком этого задания!');
+        }
+        $reply = Reply::findOne(['task_id' => $id, 'status' => Reply::STATUS_ACCEPTED]);
+        $task->budget = $reply->price;
+        if (Action::doAction(Action::ACTION_COMPLETE, $task, $custom->id)) {
+            if ($task->update() === false) {
+                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+            }
+        }
+        return $this->refresh();
+    }
+
+    public function actionMyTasks(string $code)
+    {
+        $codes = [
+            Task::FILTER_NEW,
+            Task::FILTER_PROCESS,
+            Task::FILTER_CLOSED,
+            Task::FILTER_TIMEOUT,
+        ];
+        if (!in_array($code, $codes)) {
+            throw new NotFoundHttpException('Страница для ' . $code . ' не найдена');
+        }
+        $contr = $this->user->contractor;
+        $contr = $this->user->contractor;
+        $tasks = TasksSelector::selectTasksByStatus(
+            $this->user->id,
+            Task::TASK_STATUSES[$contr][$code]
+        );
+        return $this->render('my-task', [
+            'code' => $code,
+            'contr' => $contr,
+            'tasks' => $tasks,
+        ]);
     }
 }

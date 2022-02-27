@@ -7,61 +7,160 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use app\models\Task;
+use yii\bootstrap4\Modal;
+use yii\bootstrap4\ActiveForm;
+use app\models\Reply;
+
+$user = Yii::$app->helpers->checkAuthorization();
+//прячем вызов модального диалога, если среди авторов
+//откликов на задание есть активный пользователь
+$hideReply = false;
+foreach ($replies as $reply) {
+    if ($reply->contr_id === $user->id) {
+        $hideReply = true;
+        break;
+    }
+}
 
 ?>
 <div class="left-column">
     <div class="head-wrapper">
-        <h3 class="head-main"><?=Html::encode($task->name)?></h3>
-        <p class="price price--big" <?=empty($task->budget) ? 'hidden' : ''?>>
-            <?=Html::encode($task->budget)?> ₽</p>
+        <h3 class="head-main"><?=Html::encode($task->name) . ' (' . Task::TASK_DESCR[$task->status] . ')'?></h3>
+        <p class="price price--big"><?=empty($task->budget) ? '' : Html::encode($task->budget) . ' ₽'?></p>
     </div>
     <p class="task-description">
         <?=Html::encode($task->description)?>
     </p>
-    <?php if ($task->status === Task::STATUS_NEW) :?>
-        <a href="#" class="button button--blue">Откликнуться на задание</a>
-    <?php elseif ($task->status === Task::STATUS_ON_DEAL) :?>
-        <a href="#" class="button button--blue">Отказаться от задания</a>
-    <?php endif; ?>
-    <div class="task-map" <?=empty($task->city) ? 'hidden' : '';?>>
-        <img class="map" src=<?=Url::to('/img/map.png', true);?> width="725" height="346" alt="Адрес задания">
-        <p class="map-address town"><?=Html::encode($task->city)?></p>
-        <p class="map-address"><?=Html::encode($task->street)?></p>
-    </div>
-    <h4 class="head-regular">Отклики на задание</h4>
-    <?php foreach ($replies as $reply) : ?>
-        <div class="response-card">
-            <img class="customer-photo" src=<?=Url::to(Html::encode($reply->avatar), true);?>
-                width="146" height="156" alt="Фото заказчиков">
-            <div class="feedback-wrapper">
-                <a href="<?='/user/' . $reply->contr_id?>" class="link link--block link--big">
-                    <?=$reply->contractor?>
-                </a>
-                <div class="response-wrapper">
-                    <div class="stars-rating small">
-                        <?php foreach ($reply->rating as $value) :?>
-                            <?= $value ? '<span class="fill-star">&nbsp;</span>' : '<span>&nbsp;</span>'?>
-                        <?php endforeach; ?>
-                    </div>
-                    <p class="reviews"><?=$reply->reviews . ' ' .
-                        Yii::$app->helpers->getNounPluralForm($reply->reviews, 'отзыв', 'отзыва', 'отзывов')?></p>
+    <!-- Рисуем модальное окно для исполнителя и формирования отклика на новое задание -->
+    <?php if ($user->contractor) :?>
+        <?php if ($task->status === Task::STATUS_NEW and !$hideReply) :?>
+            <?php Modal::begin([
+                    'title' => '<h2>Отправка отклика</h2>',
+                    'toggleButton' => [
+                        'label' => 'Откликнуться на задание',
+                        'tag' => 'button',
+                        'class' => 'button button--blue',
+                    ],
+                    'footer' => $task->name,
+                ]);
+            ?>
+            <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
+                <?= $form->field($reply, 'comment')->textarea(['autofocus' => true]) ?>
+                <?= $form->field($reply, 'price')->input('number') ?>
+                <div class="form-group">
+                    <button type="button" class="modal-button" data-dismiss="modal">Отменить</button>
+                    <button type="submit" class="modal-button"
+                        form="modal-form" name="reply" value="ok">Отправить</button>
                 </div>
-                <p class="response-message">
-                    <?=$reply->comment?>
-                </p>
-            </div>
-            <div class="feedback-wrapper">
-                <p class="info-text"><span class="current-time">
-                    <?=Yii::$app->helpers->getTimeStr(Html::encode($reply->add_date))?></span>
-                </p>
-                <p class="price price--small"><?=Html::encode($reply->price) . ' ₽'?></p>
-            </div>
-            <div class="button-popup">
-                <a href="#" class="button button--blue button--small">Принять</a>
-                <a href="#" class="button button--orange button--small">Отказать</a>
-            </div>
+            <?php ActiveForm::end(); ?>
+            <?php Modal::end(); ?>
+        <?php elseif ($task->status === Task::STATUS_ON_DEAL and $user->id === $task->contr_id) :?>
+            <!-- Модальное окно для исполнителя для отказа от задания -->
+            <?php Modal::begin([
+                    'title' => '<h2>Подвердите отказ от задания</h2>',
+                    'toggleButton' => [
+                        'label' => 'Отказ от задания',
+                        'tag' => 'button',
+                        'class' => 'button button--blue',
+                    ],
+                    'footer' => $task->name,
+                ]);
+            ?>
+            <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
+                <?= $form->field($reply, 'comment')->textarea(['autofocus' => true]) ?>
+                <div class="form-group">
+                    <button type="button" class="modal-button"
+                        data-dismiss="modal">Вернуться</button>
+                    <button type="submit" class="modal-button"
+                        form="modal-form" name="refuse" value="ok">Отказаться</button>
+                </div>
+            <?php ActiveForm::end(); ?>
+            <?php Modal::end(); ?>
+        <?php endif; ?>
+    <?php endif; ?>
+    <!-- Рисуем модальное окно для заказчика и формирования отзыва о работе -->
+    <?php if ($user->id === $task->custom_id) :?>
+        <?php if ($task->status === Task::STATUS_NEW) :?>
+            <a href="<?='/cancel/' . $task->id?>" class="button button--blue">Отменить задание</a>
+        <?php elseif ($task->status === Task::STATUS_ON_DEAL) :?>
+            <?php Modal::begin([
+                    'title' => '<h2>Принять задание</h2>',
+                    'toggleButton' => [
+                        'label' => 'Завершить задание',
+                        'tag' => 'button',
+                        'class' => 'button button--blue',
+                    ],
+                    'footer' => $task->name,
+                ]);
+            ?>
+            <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
+                <?= $form->field($review, 'comment')->textarea(['autofocus' => true]) ?>
+                <?= $form->field($review, 'rating')->input('number', ['min' => '0', 'max' => '5']) ?>
+                <div class="form-group">
+                    <button type="button" class="modal-button" data-dismiss="modal">Вернуться</button>
+                    <button type="submit" class="modal-button" form="modal-form"
+                        name="review" value="ok">Завершить</button>
+                </div>
+            <?php ActiveForm::end(); ?>
+            <?php Modal::end(); ?>
+        <?php endif;?>
+    <?php endif;?>
+    <?php if (!empty($task->city)) :?>
+        <div class="task-map">
+            <img class="map" src=<?=Url::to('/img/map.png', true);?>
+                width="725" height="346" alt="Адрес задания">
+            <p class="map-address town"><?=Html::encode($task->city)?></p>
+            <p class="map-address"><?=Html::encode($task->street)?></p>
         </div>
-    <?php endforeach; ?>
+    <?php endif;?>
+    <!-- Отклики показываем только для заказчиков или задание новое -->
+    <?php if ($user->id === $task->custom_id or $task->status === Task::STATUS_NEW) :?>
+        <h4 class="head-regular">Отклики на задание</h4>
+        <?php foreach ($replies as $reply) : ?>
+            <div class="response-card">
+                <img class="customer-photo" src=<?=Url::to(Html::encode($reply->avatar), true);?>
+                    width="146" height="156" alt="Фото заказчиков">
+                <div class="feedback-wrapper">
+                    <a href="<?='/user/' . $reply->contr_id?>" class="link link--block link--big">
+                        <?=$reply->contractor?>
+                    </a>
+                    <div class="response-wrapper">
+                        <div class="stars-rating small">
+                            <?php foreach ($reply->rating as $value) :?>
+                                <?= $value ? '<span class="fill-star">&nbsp;</span>' :
+                                    '<span>&nbsp;</span>'?>
+                            <?php endforeach; ?>
+                        </div>
+                        <p class="reviews">
+                            <?=$reply->reviews . ' ' .
+                            Yii::$app->helpers->
+                            getNounPluralForm(
+                                $reply->reviews,
+                                'отзыв',
+                                'отзыва',
+                                'отзывов'
+                            );?></p>
+                    </div>
+                    <p class="response-message">
+                        <?=$reply->comment?>
+                    </p>
+                </div>
+                <div class="feedback-wrapper">
+                    <p class="info-text"><span class="current-time">
+                        <?=Yii::$app->helpers->getTimeStr(Html::encode($reply->add_date));?></span>
+                    </p>
+                    <p class="price price--small"><?=$reply->price . ' ₽';?></p>
+                </div>
+                <!-- если активный пользователь - заказчик, рисуем для него кнопки -->
+                <?php if ($task->custom_id === $user->id and $reply->status === Reply::STATUS_PROPOSAL) :?>
+                    <div class="button-popup">
+                        <a href=<?='/accept/' . $reply->id?> class="button blue-button">Принять</a>
+                        <a href=<?='/reject/' . $reply->id?> class="button orange-button">Отказать</a>
+                    </div>
+                <?php endif;?>
+            </div>
+        <?php endforeach;?> <!-- цикл по откликам на задание -->
+    <?php endif;?> <!--  показ откликов на задание -->
 </div>
 <div class="right-column">
     <div class="right-card black info-card">
@@ -86,8 +185,7 @@ use app\models\Task;
         <ul class="enumeration-list">
             <?php foreach ($docs as $doc) :?>
                 <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip">
-                        <?=Yii::$app->helpers->shortenFileName($doc->doc);?></a>
+                <a href="#" class="link link--block link--clip"><?=Yii::$app->helpers->shortenFileName($doc->doc);?></a>
                 <p class="file-size"><?=$doc->size?> Кб</p>
             </li>
             <?php endforeach;?>

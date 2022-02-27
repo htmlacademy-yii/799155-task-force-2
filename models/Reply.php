@@ -13,13 +13,17 @@ use Yii;
  * @property int $price
  * @property string|null $comment
  * @property string $add_date
- * @property int $rating
+ * @property int $reviews
  * @property string $status
  */
 class Reply extends \yii\db\ActiveRecord
 {
     public const STATUS_ACCEPTED = 'accepted';
     public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PROPOSAL = 'proposal';
+    public const STATUS_REFUSED = 'refused';
+
+    public $rating = [];
 
     /**
      * {@inheritdoc}
@@ -35,8 +39,8 @@ class Reply extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['task_id', 'contr_id', 'price', 'add_date', 'rating', 'status'], 'required'],
-            [['task_id', 'contr_id', 'price', 'rating'], 'integer'],
+            [['task_id', 'contr_id', 'price', 'add_date', 'status'], 'required'],
+            [['task_id', 'contr_id', 'price'], 'integer'],
             [['comment'], 'string'],
             [['add_date'], 'safe'],
             [['status'], 'string', 'max' => 16],
@@ -52,11 +56,20 @@ class Reply extends \yii\db\ActiveRecord
             'id' => 'ID',
             'task_id' => 'Task ID',
             'contr_id' => 'Contr ID',
-            'price' => 'Price',
-            'comment' => 'Comment',
+            'price' => 'Перлагаемая цена услуги',
+            'comment' => 'Дополнительная информация',
             'add_date' => 'Add Date',
-            'rating' => 'Rating',
+            'reviews' => 'Reviews count',
             'status' => 'Status',
         ];
+    }
+
+    public function saveReply(int $taskId, int $userId): bool
+    {
+        $this->task_id = $taskId;
+        $this->add_date = date("Y-m-d H:i:s");
+        $this->status = self::STATUS_PROPOSAL;
+        $this->contr_id = $userId;
+        return $this->save();
     }
 }

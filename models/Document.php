@@ -67,7 +67,7 @@ class Document extends ActiveRecord
      * Сохраняет информацию о дополнительных документах задания
      * @param ActiveRecord $model задание
      * @return bool результат операции соохранения в БД
-     */
+    */
     public static function saveDocuments(ActiveRecord $model): bool
     {
         foreach ($model->files as $file) {
@@ -83,7 +83,10 @@ class Document extends ActiveRecord
             if (!$doc->save()) {
                 return false;
             }
-            move_uploaded_file($file->tempName, Yii::$app->basePath . '/web/uploads/' . $newName);
+            move_uploaded_file(
+                $file->tempName,
+                Yii::$app->basePath . Yii::$app->params['uploadPath'] . $newName
+            );
         }
         return true;
     }

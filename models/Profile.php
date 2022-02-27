@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "profiles".
@@ -17,8 +18,9 @@ use Yii;
  * @property string|null $social_net
  * @property string|null $address
  * @property string|null $about_info дополнительная информация о себе
+ * @property string|null $categories
  */
-class Profile extends \yii\db\ActiveRecord
+class Profile extends ActiveRecord
 {
     //аноним
     public const ROLE_ANONYMOUS = 'anonymous';
@@ -41,11 +43,10 @@ class Profile extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id'], 'required'],
             [['user_id'], 'integer'],
-            [['born_date', 'last_act'], 'safe'],
-            [['about_info'], 'string'],
-            [['avatar', 'address'], 'string', 'max' => 256],
+            [['born_date', 'last_act', 'categories'], 'safe'],
+            [['about_info', 'avatar'], 'string'],
+            [['address'], 'string', 'max' => 256],
             [['phone', 'messenger', 'social_net'], 'string', 'max' => 32],
         ];
     }
@@ -66,6 +67,7 @@ class Profile extends \yii\db\ActiveRecord
             'social_net' => 'Social Net',
             'address' => 'Address',
             'about_info' => 'About Info',
+            'categories' => 'Категории'
         ];
     }
 }

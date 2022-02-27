@@ -9,6 +9,8 @@ use yii\web\HttpException;
 
 abstract class SecuredController extends Controller
 {
+    protected $user = null;
+
     public function behaviors()
     {
         return [
@@ -37,7 +39,8 @@ abstract class SecuredController extends Controller
      */
     public function beforeAction($action)
     {
-        if (Yii::$app->helpers->checkAuthorization() === null) {
+        $this->user = Yii::$app->helpers->checkAuthorization();
+        if ($this->user === null) {
             $this->redirect('/site');
             return false;
         }

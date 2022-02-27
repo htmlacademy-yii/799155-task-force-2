@@ -23,15 +23,6 @@ use TaskForce\exception\TaskForceException;
  */
 class Task extends ActiveRecord
 {
-    public $category;
-    public $files;
-    public $town;
-    public $district;
-    public $street;
-    public $longitude;
-    public $latitude;
-    public $city_id;
-
     //новое задание
     public const STATUS_NEW = 'new';
     //задание выполнено
@@ -42,6 +33,8 @@ class Task extends ActiveRecord
     public const STATUS_ON_DEAL = 'on_deal';
     //задание провалено
     public const STATUS_REFUSED = 'refused';
+    //задание просрочено
+    public const STATUS_TIMEOUT = 'timeout';
 
     public const TASK_DESCR = [
         self::STATUS_NEW => 'Новое задание',
@@ -49,6 +42,37 @@ class Task extends ActiveRecord
         self::STATUS_CANCELED => 'Задание отменено',
         self::STATUS_ON_DEAL => 'Задание в работе',
         self::STATUS_REFUSED => 'Задание провалено',
+    ];
+
+    public const FILTER_NEW = 'new';
+    public const FILTER_PROCESS = 'process';
+    public const FILTER_CLOSED = 'closed';
+    public const FILTER_TIMEOUT = 'timeout';
+
+    public const TASK_STATUSES = [
+        [
+            self::FILTER_NEW => [self::STATUS_NEW],
+            self::FILTER_PROCESS => [self::STATUS_ON_DEAL],
+            self::FILTER_CLOSED => [self::STATUS_DONE, self::STATUS_CANCELED, self::STATUS_REFUSED],
+        ],
+        [
+            self::FILTER_PROCESS => [self::STATUS_ON_DEAL],
+            self::FILTER_TIMEOUT => [self::STATUS_TIMEOUT, self::STATUS_ON_DEAL],
+            self::FILTER_CLOSED => [self::STATUS_DONE, self::STATUS_REFUSED],
+        ],
+    ];
+
+    public const FILTER_LINKS = [
+        [
+            self::FILTER_NEW => ['Новые', 'Новые задания'],
+            self::FILTER_PROCESS => ['В процессе', 'Выполняемые задания'],
+            self::FILTER_CLOSED => ['Закрытые', 'Законченные задания'],
+        ],
+        [
+            self::FILTER_PROCESS => ['В процессе', 'Выполняемые задания'],
+            self::FILTER_TIMEOUT => ['Просроченные', 'Просроченные задания'],
+            self::FILTER_CLOSED => ['Закрытые', 'Законченные задания'],
+        ]
     ];
 
     /**
@@ -64,13 +88,10 @@ class Task extends ActiveRecord
      */
     public function rules()
     {
-        $message = 'Поле не может быть пустым';
         return [
-            [['name', 'category'], 'required', 'message' => $message],
-            [['description', 'town', 'district', 'street'], 'string'],
-            [['description', 'name', 'budget', 'deadline','category', 'files', 'town', 'street', 'district'], 'safe'],
+            [['description', 'status'], 'string'],
+            [['description', 'name', 'budget', 'deadline'], 'safe'],
             ['name', 'string', 'max' => 256],
-            ['files', 'file', 'extensions' => 'doc, docx, txt', 'maxFiles' => 2],
             [
                 'budget',
                 'compare',
@@ -79,63 +100,7 @@ class Task extends ActiveRecord
                 'type' => 'number',
                 'message' => 'Стоимость должна быть больше нуля'
             ],
-            ['category', 'string' , 'message' => $message],
-            ['town', 'validateTown', 'skipOnEmpty' => true, 'skipOnError' => false],
-            ['district', 'validateDistrict', 'skipOnEmpty' => true, 'skipOnError' => false],
-            ['street', 'validateStreet', 'skipOnEmpty' => true, 'skipOnError' => false],
-            ['deadline', 'validateDeadline', 'skipOnEmpty' => true, 'skipOnError' => false],
         ];
-    }
-
-    public function validateTown($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if (empty($this->town)) {
-                return;
-            }
-            $cities = array_values(City::getCityNames());
-            $town = ucwords($this->town);
-            if (!in_array($town, $cities)) {
-                $this->addError($attribute, 'Такого города нет в БД');
-                return;
-            }
-            $city = Location::getGeoData($town);
-            $this->city_id = $city['id'];
-            $this->longitude = $city['lon'];
-            $this->latitude = $city['lat'];
-            return;
-        }
-    }
-
-    public function validateDistrict($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if (empty($this->town) and !empty($this->district)) {
-                $this->addError($attribute, 'Укажите название города');
-            }
-        }
-    }
-
-    public function validateStreet($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if (empty($this->town and !empty($this->street))) {
-                $this->addError($attribute, 'Укажите название города');
-            }
-        }
-    }
-
-    public function validateDeadline($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if (empty($this->deadline)) {
-                return;
-            }
-            $delta = strtotime($this->deadline) - time();
-            if ($delta < 24 * 60 * 60) {
-                $this->addError($attribute, 'Дата не может быть раньше текущего дня');
-            }
-        }
     }
 
     /**
@@ -155,52 +120,6 @@ class Task extends ActiveRecord
             'deadline' => 'Срок выполнения',
             'fin_date' => 'Fin Date',
             'status' => 'Status',
-            'category' => 'Категория',
-            'files' => 'Доп. файлы',
-            'town' => 'Town',
-            'district' => 'District',
-            'street' => 'Street',
         ];
-    }
-
-    /**
-     * Сохраняет задагие в БД
-     * @return bool результат операции соохранения в БД
-     */
-    public function saveTask(): bool
-    {
-        $this->custom_id = Yii::$app->user->getId();
-        $this->add_date = date("Y-m-d H:i:s");
-        $this->status = Task::STATUS_NEW;
-        if ($this->save()) {
-            if (Location::saveLocation($this)) {
-                if (Document::saveDocuments($this)) {
-                    return true;
-                }
-                //удаляем запись локации
-                $loc = Location::findOne(['task_id' => $this->id]);
-                if ($loc) {
-                    $loc->delete();
-                }
-            }
-            //удаляем запись задания
-            $this->delete();
-        }
-        return false;
-    }
-
-    public function beforeValidate(): bool
-    {
-        $mimeTypes = [
-            'application/msword',
-            'text/plain',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        ];
-        foreach ($this->files as $file) {
-            if (!Yii::$app->helpers->validateUploadedFile($file, $mimeTypes)) {
-                return false;
-            }
-        }
-        return true;
     }
 }
