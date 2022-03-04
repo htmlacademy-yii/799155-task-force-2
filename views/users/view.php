@@ -72,7 +72,7 @@ use yii\helpers\Url;
             </div>
         </div>
     </div>
-    <?php endforeach; ?>
+    <?php endforeach; ?> <!--- foreach ($reviews as $review) ---->
 </div>
 <div class="right-column">
     <div class="right-card black">

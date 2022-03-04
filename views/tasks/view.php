@@ -21,8 +21,57 @@ foreach ($replies as $reply) {
         break;
     }
 }
-
 ?>
+
+<?php if ($geocode !== null) :?>
+<head>
+<script type="text/javascript">
+        ymaps.ready(init);
+        function init() {
+            var myMap = new ymaps.Map(
+                "yandexmap",
+                {
+                    center: [<?=$geocode['lat']?>, <?=$geocode['lon']?>],
+                    zoom: 15
+                },
+                {
+                    searchControlProvider: 'yandex#search'
+                });
+            var placeMark = new ymaps.Placemark(
+                myMap.getCenter(), 
+                {
+                    iconCaption: 'Место задания',
+                    balloonContent: 'Место задания'
+                }, 
+                {
+                    preset: 'islands#redDotIconWithCaption'
+                });
+            var myPlace = new ymaps.GeoObject(
+                {// Описание геометрии.
+                    geometry: {
+                        type: "Point",
+                        coordinates: [<?=$geocode['lat']?>, <?=$geocode['lon']?>]
+                    },
+                    // Свойства.
+                    properties: {
+                        // Контент метки.
+                        iconContent: 'Место задания',
+                        //hintContent: 'Ну давай уже тащи'
+                    }
+                }, 
+                {
+                    // Опции.
+                    // Иконка метки будет растягиваться под размер ее содержимого.
+                    preset: 'islands#redStretchyIcon',
+                    // Метку можно перемещать.
+                    draggable: false
+                });
+                myMap.geoObjects.add(placeMark);
+        }
+    </script>
+</head>
+<?php endif;?>
+
 <div class="left-column">
     <div class="head-wrapper">
         <h3 class="head-main"><?=Html::encode($task->name) . ' (' . Task::TASK_DESCR[$task->status] . ')'?></h3>
@@ -31,8 +80,8 @@ foreach ($replies as $reply) {
     <p class="task-description">
         <?=Html::encode($task->description)?>
     </p>
-    <!-- Рисуем модальное окно для исполнителя и формирования отклика на новое задание -->
     <?php if ($user->contractor) :?>
+        <!-- Рисуем модальное окно для исполнителя и формирования отклика на новое задание -->
         <?php if ($task->status === Task::STATUS_NEW and !$hideReply) :?>
             <?php Modal::begin([
                     'title' => '<h2>Отправка отклика</h2>',
@@ -54,8 +103,8 @@ foreach ($replies as $reply) {
                 </div>
             <?php ActiveForm::end(); ?>
             <?php Modal::end(); ?>
+        <!-- Модальное окно для исполнителя для отказа от задания -->
         <?php elseif ($task->status === Task::STATUS_ON_DEAL and $user->id === $task->contr_id) :?>
-            <!-- Модальное окно для исполнителя для отказа от задания -->
             <?php Modal::begin([
                     'title' => '<h2>Подвердите отказ от задания</h2>',
                     'toggleButton' => [
@@ -105,15 +154,16 @@ foreach ($replies as $reply) {
             <?php Modal::end(); ?>
         <?php endif;?>
     <?php endif;?>
-    <?php if (!empty($task->city)) :?>
+    <?php if ($geocode != null) :?>
         <div class="task-map">
-            <img class="map" src=<?=Url::to('/img/map.png', true);?>
-                width="725" height="346" alt="Адрес задания">
+            <div 
+                id="yandexmap" style="width: 600px; height: 400px">
+            </div>
             <p class="map-address town"><?=Html::encode($task->city)?></p>
             <p class="map-address"><?=Html::encode($task->street)?></p>
         </div>
     <?php endif;?>
-    <!-- Отклики показываем только для заказчиков или задание новое -->
+    <!-- Отклики показываем только для заказчиков или если задание новое -->
     <?php if ($user->id === $task->custom_id or $task->status === Task::STATUS_NEW) :?>
         <h4 class="head-regular">Отклики на задание</h4>
         <?php foreach ($replies as $reply) : ?>
@@ -185,7 +235,9 @@ foreach ($replies as $reply) {
         <ul class="enumeration-list">
             <?php foreach ($docs as $doc) :?>
                 <li class="enumeration-item">
-                <a href="#" class="link link--block link--clip"><?=Yii::$app->helpers->shortenFileName($doc->doc);?></a>
+                <a href=<?='/download/' . $doc->id;?>
+                    class="link link--block link--clip">
+                    <?=Yii::$app->helpers->shortenFileName($doc->doc);?></a>
                 <p class="file-size"><?=$doc->size?> Кб</p>
             </li>
             <?php endforeach;?>

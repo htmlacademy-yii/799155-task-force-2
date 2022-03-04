@@ -7,16 +7,31 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\ActiveField;
+use yii\widgets\LinkPager;
 use app\models\Categories;
 
+$title = 'Новые задания';
 $urls = [
-    '/tasks/index' => 'Новые задания',
+    '/tasks' => $title,
+    '/tasks/index' => $title,
     '/my-tasks' => 'Мои задания',
 ];
 
+if (strstr(Url::current(), 'category') === false) {
+    foreach ($urls as $key => $value) {
+        if (strstr(Url::current(), $key) !== false) {
+            $title = $value;
+            break;
+        } 
+    }
+} else {
+    $title = $categoryNames[Categories::MAIN_CATEGORIES][$categories->categoriesCheckArray[0]];
+    $title .= ' (новые задания)';
+}
+
 ?>
 <div class="left-column">
-    <h3 class="head-main head-task"><?=$urls[Url::current()]?></h3>
+    <h3 class="head-main head-task"><?=$title?></h3>
     <?php foreach ($tasks as $task) : ?>
         <div class="task-card">
         <div class="header-task">
@@ -37,25 +52,26 @@ $urls = [
         </div>
     </div>
     <?php endforeach; ?>
+    <?php if ($pages->getPageCount() > 1) :?>
     <div class="pagination-wrapper">
         <ul class="pagination-list">
             <li class="pagination-item mark">
-                <a href="#" class="link link--page"></a>
+                <a href=<?='/tasks/' . ($pages->getPage() > 0 ? $pages->getPage() : '#')?>
+                    class="link link--page"></a>
             </li>
-            <li class="pagination-item">
-                <a href="#" class="link link--page">1</a>
-            </li>
-            <li class="pagination-item pagination-item--active">
-                <a href="#" class="link link--page">2</a>
-            </li>
-            <li class="pagination-item">
-                <a href="#" class="link link--page">3</a>
-            </li>
+            <?php for ($page = 1; $page <= $pages->getPageCount(); $page++) :?>
+                <li class="pagination-item 
+                    <?=($page === $pages->getPage() + 1) ? 'pagination-item--active' : ''?>">
+                    <a href=<?='/tasks/' . $page?> class="link link--page"><?=$page?></a>
+                </li>
+            <?php endfor;?>
             <li class="pagination-item mark">
-                <a href="#" class="link link--page"></a>
+                <a href=<?='/tasks/' . ($pages->getPage() < $pages->getPageCount() - 1 ? $pages->getPage() + 2 : '#')?>
+                    class="link link--page"></a>
             </li>
         </ul>
     </div>
+    <?php endif;?>
 </div>
 <div class="right-column">
     <div class="right-card black">

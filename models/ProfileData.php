@@ -10,6 +10,9 @@ class ProfileData extends Profile
     public $email;
     public $categoriesCheckArray = Categories::CATEGORIES_NOT_SELECTED;
     public $contractor;
+    public $town;
+    public $longitude;
+    public $latitude;
 
     public function __construct($prof, $user)
     {
@@ -22,12 +25,13 @@ class ProfileData extends Profile
         $this->messenger = $prof->messenger;
         $this->about_info = $prof->about_info;
         $this->contractor = $user->contractor;
+        $this->town = $prof->city;
     }
 
     public function rules()
     {
         return [
-            [['born_date', 'last_act', 'messenger', 'categoriesCheckArray'], 'safe'],
+            [['born_date', 'last_act', 'messenger', 'categoriesCheckArray', 'town'], 'safe'],
             [['about_info', 'avatar', 'messenger'], 'string'],
             [['address'], 'string', 'max' => 256],
             [['phone', 'messenger', 'social_net'], 'string', 'max' => 32],
@@ -42,11 +46,30 @@ class ProfileData extends Profile
         $prof->born_date = $this->born_date;
         $prof->messenger = $this->messenger;
         $prof->about_info = $this->about_info;
+        $prof->city = $this->town;
         $prof->last_act = date("Y-m-d H:i:s");
-        $prof->update();
+        if ($prof->update() === false) {
+            throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($prof));
+        }
+        $city = City::findOne(['name' => $this->town]);
+        if (!$city) {
+            $props = [
+                'name' => $this->town,
+                'longitude' => $this->longitude,
+                'latitude' => $this->latitude,
+            ];
+            $city = new City();
+            $city->attributes = $props;
+            if ($city->save() === false) {
+                throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($city));
+            }
+        }
+        $user->city_id = $city->id;
         $user->email = $this->email;
         $user->name = $this->name;
-        $user->update();
+        if ($user->update() === false) {
+            throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($user));
+        }
         return true;
     }
 

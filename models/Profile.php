@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property string|null $address
  * @property string|null $about_info дополнительная информация о себе
  * @property string|null $categories
+ * @property string|null $city
  */
 class Profile extends ActiveRecord
 {
@@ -44,7 +45,7 @@ class Profile extends ActiveRecord
     {
         return [
             [['user_id'], 'integer'],
-            [['born_date', 'last_act', 'categories'], 'safe'],
+            [['born_date', 'last_act', 'categories', 'city'], 'safe'],
             [['about_info', 'avatar'], 'string'],
             [['address'], 'string', 'max' => 256],
             [['phone', 'messenger', 'social_net'], 'string', 'max' => 32],
@@ -67,7 +68,8 @@ class Profile extends ActiveRecord
             'social_net' => 'Social Net',
             'address' => 'Address',
             'about_info' => 'About Info',
-            'categories' => 'Категории'
+            'categories' => 'Категории',
+            'city' => 'Город',
         ];
     }
 }

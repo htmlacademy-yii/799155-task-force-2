@@ -59,7 +59,7 @@ class Document extends ActiveRecord
      */
     public static function selectDocuments(int $taskId): array
     {
-        $docs = self::find()->select(['doc', 'size'])->where(['task_id' => $taskId])->all();
+        $docs = self::find()->select(['id', 'doc', 'size'])->where(['task_id' => $taskId])->all();
         return $docs;
     }
 
@@ -80,7 +80,7 @@ class Document extends ActiveRecord
             ];
             $doc = new Document();
             $doc->attributes = $props;
-            if (!$doc->save()) {
+            if ($doc->save() === false) {
                 return false;
             }
             move_uploaded_file(

@@ -50,10 +50,18 @@ $config = [
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp.mail.ru',
+                'port' => 465,
+                'encryption' => 'ssl',
+                'username' => 'yeticave@inbox.ru',
+                'password' => 'Pd7YqbQcdMFJZXBqjxUp',
+            ],
             // send all mails to a file by default. You have to set
             // 'useFileTransport' to false and configure a transport
             // for the mailer to send real emails.
-            'useFileTransport' => true,
+            'useFileTransport' => false,
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -72,9 +80,9 @@ $config = [
             'enableStrictParsing' => false,
             'rules' => [
                 'task/<id:\d+>' => 'tasks/view',
-                'my-tasks/<code:\w+>' => 'tasks/my-tasks',
+                'my-tasks/<code:\w+>&<page:\d+>' => 'tasks/my-tasks',
                 'user/<id:\d+>' => 'users/view',
-                'category/<id:\d+>' => 'tasks/category',
+                'category/<id:\d+>&<page:\d+>' => 'tasks/category',
                 'logon' => 'auth/logon',
                 'registration' => 'auth/registration',
                 'logout' => 'auth/logout',
@@ -84,7 +92,9 @@ $config = [
                 'reject/<id:\d+>' => 'tasks/reject',
                 'edit-profile/<id:\d+>' => 'users/edit-profile',
                 'cancel/<id:\d+>' => 'tasks/cancel',
-
+                'tasks/<page:\d+>' => 'tasks/index',
+                'contact' => 'site/contact',
+                'download/<docId:\d+>' => 'tasks/download',
             ],
         ],
     ],

@@ -17,13 +17,17 @@ use app\models\Location;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+use yii\data\Pagination;
 use TaskForce\logic\Action;
 
 class TasksController extends SecuredController
 {
-    private function renderTasks(Categories $categories, array $statuses, int $userId = 0)
+    private function renderTasks(Categories $categories, array $statuses, $page, int $userId = 0)
     {
-        $tasks = TasksSelector::selectTasks($categories, $statuses, $userId);
+        $pages = new Pagination();
+        $pages->setPage($page - 1);
+        $pages->pageSize = TasksSelector::TASKS_PER_PAGE;
+        $tasks = TasksSelector::selectTasks($categories, $statuses, $pages, $userId);
         $categoryNames[Categories::MAIN_CATEGORIES] = Category::getCategoryNames();
         $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
         $categoryNames[Categories::PERIODS] = array_map(
@@ -37,13 +41,14 @@ class TasksController extends SecuredController
             'tasks' => $tasks,
             'categories' => $categories,
             'categoryNames' => $categoryNames,
+            'pages' => $pages,
         ]);
     }
 
-    public function actionIndex()
+    public function actionIndex(int $page = 1)
     {
         $categories = new Categories();
-        return $this->renderTasks($categories, [TasksSelector::STATUS_NEW]);
+        return $this->renderTasks($categories, [TasksSelector::STATUS_NEW], $page);
     }
 
     public function acceptReply($reply)
@@ -105,6 +110,10 @@ class TasksController extends SecuredController
                 }
             }
         }
+        $geoCode = null;
+        if (!empty($task->city)) {
+            $geoCode = Location::getGeoLocation($task->id);
+        }
         $replies = RepliesSelector::selectRepliesByTask($task->id);
         $docs = Document::selectDocuments($id);
         return $this->render('view', [
@@ -113,14 +122,28 @@ class TasksController extends SecuredController
             'docs' => $docs,
             'reply' => $reply,
             'review' => $review,
+            'geocode' => $geoCode,
         ]);
     }
 
-    public function actionCategory(int $id)
+    public function actionDownload(int $docId)
+    {
+        $doc = Document::findOne($docId);
+        if ($doc) {
+            return Yii::$app->response->sendFile(
+                Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $doc->fname, 
+                $doc->doc, 
+                [ 'inline' => false,]
+            );
+        }
+        return $this->refresh();
+    }
+
+    public function actionCategory(int $id, int $page = 1)
     {
         $categories = new Categories();
         $categories->categoriesCheckArray = [$id];
-        return $this->renderTasks($categories, [TasksSelector::STATUS_NEW]);
+        return $this->renderTasks($categories, [TasksSelector::STATUS_NEW], $page);
     }
 
     public function actionAddTask()
@@ -247,7 +270,7 @@ class TasksController extends SecuredController
         return $this->refresh();
     }
 
-    public function actionMyTasks(string $code)
+    public function actionMyTasks(string $code, int $page)
     {
         $codes = [
             Task::FILTER_NEW,
@@ -260,14 +283,19 @@ class TasksController extends SecuredController
         }
         $contr = $this->user->contractor;
         $contr = $this->user->contractor;
+        $pages = new Pagination();
+        $pages->pageSize = TasksSelector::TASKS_PER_PAGE;
         $tasks = TasksSelector::selectTasksByStatus(
             $this->user->id,
-            Task::TASK_STATUSES[$contr][$code]
+            Task::TASK_STATUSES[$contr][$code],
+            $pages
         );
+        $pages->setPage($page - 1);
         return $this->render('my-task', [
             'code' => $code,
             'contr' => $contr,
             'tasks' => $tasks,
+            'pages' => $pages,
         ]);
     }
 }

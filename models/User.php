@@ -43,7 +43,6 @@ class User extends ActiveRecord implements IdentityInterface
             [['name', 'email', 'password'], 'string', 'max' => 64],
             [['email'], 'unique'],
             [['city_id', 'contractor'], 'integer'],
-            [['add_date'], 'date'],
         ];
     }
 

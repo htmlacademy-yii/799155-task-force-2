@@ -8,6 +8,7 @@ use yii\helpers\Url;
 use app\assets\AppAsset;
 use app\models\User;
 use app\models\Profile;
+use app\models\ProfileFile;
 use app\models\Task;
 
 AppAsset::register($this);
@@ -17,6 +18,7 @@ $urls = [
     '/site/index',
     '/registration',
     '/logon',
+    '/contact',
 ];
 
 //страницы, в верстке которых есть модальные окна
@@ -46,12 +48,17 @@ $modal = array_reduce($urlsWhithModal, function ($out, $url) {
 }, 0);
 
 $userName = 'Аноним';
-$avatar = '/img/logo.png';
+$avatar = ProfileFile::AVATAR_ANONIM;
 $user = Yii::$app->helpers->checkAuthorization();
 if ($user) {
     $userName = $user->name;
     $avatar = Profile::findOne(['user_id' => $user->id])->avatar;
+    if ($avatar === null) {
+        $avatar = ProfileFile::AVATAR_ANONIM;
+    }
 }
+
+
 ?>
 
 <?php $this->beginPage() ?>
@@ -64,8 +71,13 @@ if ($user) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
+    <script src=<?="https://api-maps.yandex.ru/2.1/?apikey=" . Yii::$app->params['mapApiKey'] .
+        "&lang=ru_RU"?> type="text/javascript"> </script>
 </head>
 <style>
+html, body, #yandexmap {
+            width: 100%; height: 100%; padding: 0; margin: 0;}
+
 .page-header {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -96,10 +108,19 @@ input[type=date] {
   width: 160px;
   -ms-flex-item-align: start;
       align-self: flex-start; }
+
+  .list-item:hover:not(.list-item--active) .link--nav {
+    text-decoration: none;
+    color: #05060f; }
+
+  .menu-item a {
+    text-decoration: none;
+    color: #05060f; }
 </style>
 <body>
   <?php $this->beginBody() ?>
-    <header class="page-header" <?=$hidden?>>
+    <?php if ($hidden === '') :?>
+    <header class="page-header">
         <nav class="main-nav">
             <a href='/site' class="header-logo">
                 <img class="logo-image" src=<?=Url::to('/img/logotype.png', true);?>
@@ -109,13 +130,13 @@ input[type=date] {
                 <ul class="nav-list">
                     <li class="list-item
                         <?=strstr(Url::current(), '/tasks') ? 'list-item--active' : ''?>">
-                        <a href="/tasks" class="link link--nav">Новые</a>
+                        <a href="/tasks/1" class="link link--nav">Новые</a>
                     </li>
                     <?php if ($user) :?>
                     <li class="list-item
                         <?=strstr(Url::current(), '/my-tasks') ? 'list-item--active' : ''?>">
                         <a href=<?='/my-tasks/' . ($user->contractor > 0 ?
-                            Task::FILTER_PROCESS : Task::FILTER_NEW)?> 
+                            Task::FILTER_PROCESS : Task::FILTER_NEW) . '&1'?> 
                             class="link link--nav">Мои задания</a>
                     </li>
                     <?php endif;?>
@@ -124,17 +145,13 @@ input[type=date] {
                         <?=$hideAddTaskItem?>>
                         <a href="/add-task" class="link link--nav">Создать задание</a>
                     </li>
-                    <li class="list-item
-                        <?=strstr(Url::current(), '#') ? 'list-item--active' : ''?>">
-                        <a href="#" class="link link--nav">Настройки</a>
-                    </li>
                     <li class="list-item">
                         <a href="/site" class="link link--nav">Главная страница</a>
                     </li>
                 </ul>
             </div>
         </nav>
-        <div class="user-block">
+        <div class="user-block" <?=$hidden?>>
             <a href="#">
                 <img class="user-photo" src=<?=Url::to($avatar, true);?>
                     width="55" height="55" alt="Аватар">
@@ -149,7 +166,7 @@ input[type=date] {
                         </li>
                         <?php endif;?>
                         <li class="menu-item">
-                            <a href="#" class="link">Связаться с нами</a>
+                            <a href="/contact" class="link">Связаться с нами</a>
                         </li>
                         <li class="menu-item">
                             <a href="/logout" class="link">Выход из системы</a>
@@ -159,6 +176,7 @@ input[type=date] {
             </div>
         </div>
     </header>
+    <?php endif;?>
     <main class="main-content container <?=$classMod?>">
         <?=$content; ?>
     </main>

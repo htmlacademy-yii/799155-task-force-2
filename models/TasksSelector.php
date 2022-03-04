@@ -11,9 +11,8 @@ namespace app\models;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\data\Pagination;
 use TaskForce\exception\TaskForceException;
-
-const TASK_PER_PAGE = 5;
 
 class TasksSelector extends Task
 {
@@ -27,6 +26,9 @@ class TasksSelector extends Task
     public $city_id;
     public $code;
     public $timeout = false; //true, если задание выполняется и просрочено
+    public $address;
+
+    public const TASKS_PER_PAGE = 5;
 
     public const TIME_PERIODS = [
         '1' => 'час',
@@ -38,10 +40,12 @@ class TasksSelector extends Task
     {
         $message = 'Поле не может быть пустым';
         return [
-            [['name', 'category'], 'required', 'message' => $message],
+            [['name', 'category', 'address'], 'required', 'message' => $message],
             [['description', 'city', 'district', 'street', 'status'], 'string'],
             [['description', 'name', 'budget', 'deadline'], 'safe'],
-            [['category', 'files', 'city', 'street', 'district', 'status'], 'safe'],
+            [['category', 'files', 'address', 'status', 'city', 'street'], 'safe'],
+            [['longitude', 'latitude'], 'safe'],
+            [['longitude', 'latitude'], 'validateAddress'],
             ['name', 'string', 'max' => 256],
             ['files', 'file', 'extensions' => 'doc, docx, txt', 'maxFiles' => 2],
             [
@@ -53,47 +57,15 @@ class TasksSelector extends Task
                 'message' => 'Стоимость должна быть больше нуля'
             ],
             ['category', 'string' , 'message' => $message],
-            ['city', 'validateTown', 'skipOnEmpty' => true, 'skipOnError' => false],
-            ['district', 'validateDistrict', 'skipOnEmpty' => true, 'skipOnError' => false],
-            ['street', 'validateStreet', 'skipOnEmpty' => true, 'skipOnError' => false],
             ['deadline', 'validateDeadline', 'skipOnEmpty' => true, 'skipOnError' => false],
         ];
     }
 
-    public function validateTown($attribute, $params)
+    public function validateAddress($attribute, $params)
     {
         if (!$this->hasErrors()) {
-            if (empty($this->city)) {
-                return;
-            }
-            $cities = array_values(City::getCityNames());
-            $city = ucwords($this->city);
-            if (!in_array($city, $cities)) {
-                $this->addError($attribute, 'Такого города нет в БД');
-                return;
-            }
-            $data = Location::getGeoData($city);
-            $this->city_id = $data['id'];
-            $this->longitude = $data['lon'];
-            $this->latitude = $data['lat'];
-            return;
-        }
-    }
-
-    public function validateDistrict($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if (empty($this->city) and !empty($this->district)) {
-                $this->addError($attribute, 'Укажите название города');
-            }
-        }
-    }
-
-    public function validateStreet($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if (empty($this->city and !empty($this->street))) {
-                $this->addError($attribute, 'Укажите название города');
+            if (empty($this->longitude) or empty($this->latitude)) {
+                $this->addError($attribute, 'Ошибка в задании локации');
             }
         }
     }
@@ -109,16 +81,6 @@ class TasksSelector extends Task
                 $this->addError($attribute, 'Дата не может быть раньше текущего дня');
             }
         }
-    }
-
-    /**
-     * Проверяет, просрочено ли задание
-     * @return bool false, если не просрочено
-     */
-    public function checkTimeout()
-    {
-        $delta = strtotime($this->deadline) - time();
-        return $delta > 0;
     }
 
     /**
@@ -140,9 +102,9 @@ class TasksSelector extends Task
             'status' => 'Status',
             'category' => 'Категория',
             'files' => 'Доп. файлы',
-            'city' => 'Town',
-            'district' => 'District',
-            'street' => 'Street',
+            'address' => 'Адрес задания',
+            'city' => 'Город',
+            'street' => 'Улица',
         ];
     }
 
@@ -177,7 +139,7 @@ class TasksSelector extends Task
         $this->custom_id = Yii::$app->user->getId();
         $this->add_date = date("Y-m-d H:i:s");
         $this->status = Task::STATUS_NEW;
-        if ($this->save()) {
+        if ($this->save() === true) {
             if (Location::saveLocation($this)) {
                 if (Document::saveDocuments($this)) {
                     return true;
@@ -204,9 +166,8 @@ class TasksSelector extends Task
     public static function selectTasks(
         Categories $categories,
         array $statuses,
-        int $userId = 0,
-        int $limit = TASK_PER_PAGE,
-        $offset = 0
+        Pagination $pages,
+        int $userId = 0
     ): array {
         $selectedCategoriesId = $categories->categoriesCheckArray;
         $additionalCondition = $categories->additionCategoryCheck;
@@ -252,7 +213,11 @@ class TasksSelector extends Task
             $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
             $query = $query->andWhere(['>', 'add_date', "$date"]);
         }
-        $query = $query->limit($limit)->offset($offset)->orderBy(['add_date' => SORT_DESC]);
+        $countQuery = clone $query;
+        $pages->totalCount = $countQuery->count();
+        $pages->forcePageParam = false;
+        $pages->pageSizeParam = false;
+        $query = $query->limit($pages->limit)->offset($pages->offset)->orderBy(['add_date' => SORT_DESC]);
         $taskIds = $query->all();
         $tasks = [];
         foreach ($taskIds as $taskId) {
@@ -273,8 +238,7 @@ class TasksSelector extends Task
     public static function selectTasksByStatus(
         int $userId,
         array $statuses,
-        int $limit = 5,
-        int $offset = 0
+        Pagination $pages
     ): array {
         $tasks = [];
         $requierdFields = [
@@ -292,7 +256,12 @@ class TasksSelector extends Task
         if (in_array(Task::FILTER_TIMEOUT, $statuses)) {
             $query->andWhere(['<', 'deadline', 'NOW()']);
         }
-        $query->limit($limit)->offset($offset);
+        $countQuery = clone $query;
+        $pages->totalCount = $countQuery->count();
+        $pages->pageSize = self::TASKS_PER_PAGE;
+        $pages->forcePageParam = false;
+        $pages->pageSizeParam = false;
+        $query->limit($pages->limit)->offset($pages->offset);
         $query->orderBy(['add_date' => SORT_DESC]);
         $taskIds = $query->all();
         foreach ($taskIds as $taskId) {

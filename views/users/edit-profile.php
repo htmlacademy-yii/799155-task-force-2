@@ -6,16 +6,36 @@ use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Modal;
 use yii\widgets\MaskedInput;
 use app\models\Categories;
+use app\models\ProfileFile;
 
 $user = Yii::$app->helpers->checkAuthorization();
 
 ?>
+<head>
+<script type="text/javascript">
+    ymaps.ready(init);
+    function init() {
+            // Подключаем поисковые подсказки к полю ввода.
+            var suggestView = new ymaps.SuggestView('profiledata-address');
+        };
+</script>
+<style>
+.regular-form {
+  width: 600px;
+}
+</style>
+</head>
+
 <div class="my-profile-form">
     <h3 class="head-main head-regular">Мой профиль</h3>
     <div class="photo-editing">
         <div class="form-group">
             <p class="form-label">Аватар</p>
-            <img src=<?=$model->avatar?> width="83" height="83">
+            <?php if ($model->avatar !== null) :?>
+                <img src=<?=$model->avatar?> width="83" height="83">
+            <?php else :?>
+                <img src=<?=ProfileFile::AVATAR_ANONIM?> width="83" height="83">
+            <?php endif;?>
         </div>
     </div>
     <?php Modal::begin([
@@ -71,7 +91,35 @@ $user = Yii::$app->helpers->checkAuthorization();
                         'class' => 'form-label',
                     ],
                 ]
-            )->input('text')->label('Ваш адрес');?>
+                )->input('text')->label('Ваш адрес');
+                echo $form->field(
+                    $model,
+                    'town',
+                    [
+                        'labelOptions' => [
+                            'hidden' => 'hidden',
+                        ],
+                    ]
+                )->hiddenInput();
+                echo $form->field(
+                    $model,
+                    'latitude',
+                    [
+                        'labelOptions' => [
+                            'hidden' => 'hidden',
+                        ],
+                    ]
+                )->hiddenInput();
+                echo $form->field(
+                    $model,
+                    'longitude',
+                    [
+                        'labelOptions' => [
+                            'hidden' => 'hidden',
+                        ],
+                    ]
+                )->hiddenInput();
+            ?>
         </div>
         <div class="half-wrapper">
             <div class="form-group">
@@ -176,3 +224,36 @@ $user = Yii::$app->helpers->checkAuthorization();
         </div>
     <?php ActiveForm::end(); ?>
 </div>
+<?php
+$js = <<<JS
+var address = $('#profiledata-address'),
+    city = $('#profiledata-town');
+    address.on('change', function() {
+    setTimeout(function() {
+        // Забираем запрос из поля ввода.
+        var request = address.val();
+        // Геокодируем введённые данные.
+        ymaps.geocode(request).then(
+            function (res) {
+                var obj = res.geoObjects.get(0);
+                if (address.val().indexOf('Москва') !== -1) {
+                    city.val('Москва');
+                } else {
+                    city.val(obj.getLocalities()[0]);
+                }
+                var bounds = obj.properties.get('boundedBy'),
+                    mapState = ymaps.util.bounds.getCenterAndZoom(
+                        bounds, 
+                        [300, 200]
+                    );
+                    latitude.val(mapState.center[0]);
+                    longitude.val(mapState.center[1]);
+            },
+            function (e) {
+            console.log(e)
+        });
+    }, 400);
+});
+JS;
+$this->registerJs($js);
+?>

@@ -1,10 +1,5 @@
 <?php
 
-namespace app\models;
-
-use Yii;
-use yii\db\ActiveRecord;
-
 /**
  * This is the model class for table "locations".
  *
@@ -17,6 +12,17 @@ use yii\db\ActiveRecord;
  * @property string|null $street улица
  * @property string|null $info дополн. информация
  */
+
+namespace app\models;
+
+use Yii;
+use yii\db\ActiveRecord;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7\Request;
+
 class Location extends ActiveRecord
 {
     public const TYPE_CITY = 'city';
@@ -66,19 +72,19 @@ class Location extends ActiveRecord
      * Если ищем данные только для self::TYPE_CITY, то параметр name не важен.
      * Если ищем данные по названию района или улицы, то следует
      * задать имя города и соответствующее название
-     * @param string $city имя города
+     * @param string $name имя города
      * @param string $type тип локации: self::TYPE_CITY или
      * self::TYPE_DISTRICT или self::TYPE_STREET
-     * @param string $name null или имя локации в соответствии с типом
+     * @param string $more null или имя локации в соответствии с типом
      *
      * @return array данные локации или null
-     *
-     * Пока нет реальной работы с геоданными, функция-заглушка выдает координаты из БД
-     * независимо от задания района и/или улицы
      */
-    public static function getGeoData(string $city, string $type = Location::TYPE_CITY, string $name = null): ?array
-    {
-        $city = City::findOne(['name' => $city]);
+    public static function getGeoData(
+        string $name,
+        string $type = Location::TYPE_CITY,
+        string $more = null
+        ): ?array {
+        $city = City::findOne(['name' => $name]);
         if ($city) {
             return [
                 'id' => $city->id,
@@ -86,23 +92,80 @@ class Location extends ActiveRecord
                 'lon' => $city->longitude,
             ];
         }
+        $apiKey = Yii::$app->params['mapApiKey'];
+        $client = new Client([
+            'base_uri' => 'https://geocode-maps.yandex.ru/1.x/',
+        ]);
+        try {
+            $request = new Request('GET', '');
+            $response = $client->send($request, [
+                'query' => [
+                    'kind' => 'locality',
+                    'format' => 'json',
+                    'apikey' => $apiKey,
+                    'geocode' => $name,
+                ],
+            ]);
+            if ($response->getStatusCode() !== 200) {
+                throw new BadResponseException("Response error: " . $response->getReasonPhrase(), $request, $response);
+            }
+            $content = $response->getBody()->getContents();
+            $responseData = json_decode($content, true);
+            if (json_last_error() !== \JSON_ERROR_NONE) {
+                throw new ServerException("Invalid json format", $request, $response);
+            }
+            if ($error = ArrayHelper::getValue($responseData, 'error.info')) {
+                throw new BadResponseException("API error: " . $error, $request, $response);
+            }
+        } catch (RequestException $e) {
+            //throw new \Exception($e->getMessage());
+            return null;
+        }
+        $featureMember = $responseData['response']['GeoObjectCollection']['featureMember'];
+        $pos = $featureMember[0]['GeoObject']['Point']['pos'];
+        $blank = strpos($pos, ' ');
+        $city = new City();
+        $city->name = $city;
+        $city->longitude = substr($pos, 0, $blank);
+        $city->latitude = substr($pos, $blank + 1);
+        if ($city->save() === true) {
+            return [
+                'id' => $city->id,
+                'lon' => $city->longitude,
+                'lat' => $city->latitude,
+            ];
+        }
         return null;
     }
 
     /**
      * Сохраняет данные локации задания
-     * @param ActiveRecord $model задание
+     * @param TasksSelector $model задание
+     * 
      * @return bool результат сохранения данных в базе
     */
-    public static function saveLocation(ActiveRecord $model): bool
+    public static function saveLocation(TasksSelector $model): bool
     {
-        if (empty($model->city_id)) {
+        if (empty($model->city)) {
             //задание без привязки не криминал
             return true;
         }
+        $city = City::findOne(['name' => $model->city]);
+        if (!$city) {
+            $props = [
+                'name' => $model->city,
+                'longitude' => $model->longitude,
+                'latitude' => $model->latitude,
+            ];
+            $city = new City();
+            $city->attributes = $props;
+            if ($city->save() === false) {
+                throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($city));
+            }
+        }
         $loc = new Location();
         $props = [
-            'city_id' => $model->city_id,
+            'city_id' => $city->id,
             'latitude' => $model->latitude,
             'longitude' => $model->longitude,
             'district' => $model->district,
@@ -111,5 +174,24 @@ class Location extends ActiveRecord
         ];
         $loc->attributes = $props;
         return $loc->save();
+    }
+
+    /**
+     * Возвращает координаты локации
+     * @param int $taskId id задания
+     * 
+     * @return array долгота и широта локации
+     */
+    public static function getGeoLocation(int $taskId): ?array
+    {
+        $loc = Location::findOne(['task_id' => $taskId]);
+        if ($loc) {
+            return [
+                'id' => $loc->city_id,
+                'lon' => $loc->longitude,
+                'lat' => $loc->latitude,
+            ];
+        }
+        return null;
     }
 }

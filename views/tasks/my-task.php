@@ -3,7 +3,9 @@
 use app\models\Task;
 use yii\helpers\Url;
 use yii\helpers\Html;
+use yii\widgets\LinkPager;
 
+$link = substr(Url::current(), 0, strpos(Url::current(), '&', -1) - 1);
 ?>
 
 <div class="left-menu">
@@ -12,7 +14,7 @@ use yii\helpers\Html;
         <?php foreach (Task::FILTER_LINKS[$contr] as $key => $value) :?>
         <li class="side-menu-item
             <?=strstr(Url::current(), $key) === false ? '' : 'side-menu-item--active';?>">
-            <a href=<?='/my-tasks/' . $key?> class="link link--nav"><?=$value[0]?></a>
+            <a href=<?='/my-tasks/' . $key . '&1'?> class="link link--nav"><?=$value[0]?></a>
         </li>
         <?php endforeach;?>
     </ul>
@@ -38,4 +40,30 @@ use yii\helpers\Html;
         </div>
     </div>
     <?php endforeach;?>
+    <?php if ($pages->getPageCount() > 1) :?>
+    <div class="pagination-wrapper">
+        <ul class="pagination-list">
+            <li class="pagination-item mark">
+                <?php if ($pages->getPage() > 1) :?>
+                    <a href=<?=$link . $pages->getPage();?> class="link link--page"></a>
+                <?php else :?>
+                    <a href=<?=$link . '1'?> class="link link--page"></a>
+                <?php endif; ?>
+            </li>
+            <?php for ($page = 1; $page <= $pages->getPageCount(); $page++) :?>
+                <li class="pagination-item 
+                    <?=($page === $pages->getPage() + 1) ? 'pagination-item--active' : ''?>">
+                    <a href=<?=$link . $page?> class="link link--page"><?=$page?></a>
+                </li>
+            <?php endfor;?>
+            <li class="pagination-item mark">
+            <?php if ($pages->getPage() < $pages->getPageCount() - 1) :?>
+                    <a href=<?=$link . ($pages->getPage() + 2);?> class="link link--page"></a>
+                <?php else :?>
+                    <a href=<?=$link . ($pages->getPage() + 1)?> class="link link--page"></a>
+                <?php endif; ?>
+            </li>
+        </ul>
+    </div>
+    <?php endif;?>
 </div>
