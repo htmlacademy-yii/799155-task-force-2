@@ -9,6 +9,7 @@ use yii\base\Model;
 
 class ProfileFile extends Model
 {
+    public const AVATAR_ANONIM = '/img/logo.png';
     public $file;
 
     public function attributeLabels()

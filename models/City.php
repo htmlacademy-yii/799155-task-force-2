@@ -66,13 +66,13 @@ class City extends \yii\db\ActiveRecord
      *
      * @return int $id
      */
-    public static function getId(string $name): int
+    public static function getId(string $name): ?int
     {
         $city = self::find()->select([
             'id'
         ])->where(['name' => $name])->one();
         if (!$city) {
-            throw new TaskForceException('Города с именем ' . $name . ' нет в БД');
+            return null;
         }
         return $city->id;
     }

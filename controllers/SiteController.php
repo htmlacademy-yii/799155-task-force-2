@@ -10,6 +10,8 @@ use yii\filters\VerbFilter;
 use app\models\TasksSelector;
 use app\models\Categories;
 use app\models\User;
+use app\models\Contact;
+use yii\data\Pagination;
 
 class SiteController extends Controller
 {
@@ -31,7 +33,9 @@ class SiteController extends Controller
 
     public function actionSite()
     {
-        $tasks = TasksSelector::selectTasks(new Categories(), [TasksSelector::STATUS_NEW], 0, 4, 0);
+        $pages = new Pagination();
+        $pages->pageSize = 4;
+        $tasks = TasksSelector::selectTasks(new Categories(), [TasksSelector::STATUS_NEW], $pages);
         return $this->render('landing', [
             'tasks' => $tasks,
         ]);
@@ -51,5 +55,31 @@ class SiteController extends Controller
             }
         }
         return $this->actionSite();
+    }
+
+    /**
+     * Показывает форму для отправки сообщения администрации
+     */
+    public function actionContact()
+    {
+        $contact = new Contact();
+        $contact->sendOk = false;
+        if (!Yii::$app->user->isGuest) {
+            $contact->name = Yii::$app->user->identity->name;
+            $contact->email = Yii::$app->user->identity->email;
+        }
+        if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->post('contact-button') === 'ok') {
+                $contact->load(Yii::$app->request->post());
+                $contact->send();
+            }
+            if (Yii::$app->request->post('modal-button') === 'ok') {
+                $contact->load(Yii::$app->request->post());
+                if ($contact->sendOk) {
+                    return $this->goBack();
+                }
+            }
+        }
+        return $this->render('contact', ['model' => $contact]);
     }
 }

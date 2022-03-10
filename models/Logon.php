@@ -13,6 +13,7 @@ class Logon extends User
         return [
             [['password'], 'required', 'message' => 'Поле пароля не может быть пустым'],
             [['email'], 'required', 'message' => 'Поле эл.почты не может быть пустым'],
+            [['email'], 'email', 'message' => 'Неверный формат эл.почты'],
             [['email', 'password'], 'safe'],
             [['email', 'password'], 'string', 'max' => 64],
             ['password', 'validatePassword'],

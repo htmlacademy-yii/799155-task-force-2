@@ -2,8 +2,12 @@
 
 namespace app\models;
 
+use yii\data\Pagination;
+
 class ReviewsSelector extends Review
 {
+    const ALL_TASKS = 1000;
+
     public $avatar; //аватар заказчика-автора отзыва
     public $name; //наименование задачи
     public $status; //статус задачи
@@ -33,6 +37,9 @@ class ReviewsSelector extends Review
         $review = $query->one();
         if ($review) {
             $review->stars = [];
+            if ($review->rating > 5) {
+                $review->rating /= 2;
+            }
             $review->stars = array_pad($review->stars, round($review->rating), true);
             $review->stars = array_pad($review->stars, 5, false);
             switch ($review->status) {
@@ -56,7 +63,9 @@ class ReviewsSelector extends Review
      */
     public static function getReviews(int $userId, array $taskStatuses = null, int $limit = null)
     {
-        $tasks = TasksSelector::selectTasksByStatus($userId, $taskStatuses);
+        $pages = new Pagination();
+        $pages->pageSize = self::ALL_TASKS;
+        $tasks = TasksSelector::selectTasksByStatus($userId, $taskStatuses, $pages);
         $reviews = [];
         foreach ($tasks as $task) {
             $review = self::selectReview($userId, $task);
@@ -83,7 +92,9 @@ class ReviewsSelector extends Review
             return array(0, 0);
         }
         //проваленные задания
-        $refusedTasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_REFUSED]);
+        $pages = new Pagination();
+        $pages->pageSize = self::ALL_TASKS;
+        $refusedTasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_REFUSED], $pages);
         $refusedCount = count($refusedTasks);
         $score = array_reduce($reviews, function ($result, $item) {
             $result += $item->rating;

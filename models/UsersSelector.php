@@ -7,6 +7,7 @@ use app\models\User;
 use app\models\TasksSelector;
 use app\models\ReviewsSelector;
 use TaskForce\exception\TaskForceException;
+use yii\data\Pagination;
 
 class UsersSelector extends User
 {
@@ -55,11 +56,13 @@ class UsersSelector extends User
         if ($user === null) {
             throw new TaskForceException('Пользователь id = ' . $userId . ' не найден!');
         }
-        $tasks = TasksSelector::selectTasksByContractor($userId, [TasksSelector::STATUS_DONE]);
+        $pages = new Pagination();
+        $pages->pageSize = ReviewsSelector::ALL_TASKS;
+        $tasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_DONE], $pages);
         $user->doneCounter = count($tasks);
-        $tasks = TasksSelector::selectTasksByContractor($userId, [TasksSelector::STATUS_REFUSED]);
+        $tasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_REFUSED], $pages);
         $user->refuseCounter = count($tasks);
-        $tasks = TasksSelector::selectTasksByContractor($userId, [TasksSelector::STATUS_ON_DEAL]);
+        $tasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_ON_DEAL], $pages);
         $user->status = count($tasks) ? self::STATUS_BUSY : self::STATUS_FREE;
         $result = ReviewsSelector::getRating($userId);
         $user->stars = [];
