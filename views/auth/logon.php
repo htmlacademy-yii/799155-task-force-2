@@ -6,6 +6,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\ActiveField;
+use yii\authclient\widgets\AuthChoice;
 
 ?>
 
@@ -45,7 +46,16 @@ use yii\widgets\ActiveField;
                 </div>
             </div>
             <div class="form-group">
-            <?= Html::submitButton('Войти', ['class' => 'button button--blue']) ?>
+                <?= Html::submitButton('Войти', ['class' => 'button button--blue']) ?>
+            </div>
+            <div>
+                <p>Вход через ВКонтакте</p>
+                <?php 
+                    echo yii\authclient\widgets\AuthChoice::widget(
+                        [
+                            'baseAuthUrl' => ['auth/vkontakte'],
+                        ]
+                    );?>
             </div>
         <?php ActiveForm::end(); ?>
     </div>

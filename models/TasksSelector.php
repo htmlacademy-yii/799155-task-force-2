@@ -319,7 +319,8 @@ class TasksSelector extends Task
         }
         $task = $query->one();
         if ($task === null) {
-            throw new TaskForceException('Задание id = ' . $taskId . ' не найдено!');
+            $message = 'Задание id = ' . $taskId . ' не найдено!';
+            Yii::$app->getSession()->setFlash('error', $message);
         }
         return $task;
     }

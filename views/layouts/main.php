@@ -10,6 +10,7 @@ use app\models\User;
 use app\models\Profile;
 use app\models\ProfileFile;
 use app\models\Task;
+use app\widgets\Alert;
 
 AppAsset::register($this);
 //страницы, у которых не надо показывать заголовок с меню
@@ -52,12 +53,14 @@ $avatar = ProfileFile::AVATAR_ANONIM;
 $user = Yii::$app->helpers->checkAuthorization();
 if ($user) {
     $userName = $user->name;
-    $avatar = Profile::findOne(['user_id' => $user->id])->avatar;
+    $profile = Profile::findOne(['user_id' => $user->id]);
+    if ($profile) {
+        $avatar = $profile->avatar;
+    }
     if ($avatar === null) {
         $avatar = ProfileFile::AVATAR_ANONIM;
     }
 }
-
 
 ?>
 
@@ -76,7 +79,7 @@ if ($user) {
 </head>
 <style>
 html, body, #yandexmap {
-            width: 100%; height: 100%; padding: 0; margin: 0;}
+  width: 100%; height: 100%; padding: 0; margin: 0; }
 
 .page-header {
   display: -webkit-box;
@@ -89,7 +92,7 @@ html, body, #yandexmap {
   border-bottom: 1px solid #d6d6d6;
   padding: 15px 12px; }
 
-  .user-name:hover ~ .popup-head,
+.user-name:hover ~ .popup-head,
 .popup-head:hover {
   display: block;
   position: absolute;
@@ -107,15 +110,15 @@ input[type=date] {
 .side-menu-item {
   width: 160px;
   -ms-flex-item-align: start;
-      align-self: flex-start; }
+  align-self: flex-start; }
 
-  .list-item:hover:not(.list-item--active) .link--nav {
-    text-decoration: none;
-    color: #05060f; }
+.list-item:hover:not(.list-item--active) .link--nav {
+  text-decoration: none;
+  color: #05060f; }
 
-  .menu-item a {
-    text-decoration: none;
-    color: #05060f; }
+.menu-item a {
+  text-decoration: none;
+  color: #05060f; }
 </style>
 <body>
   <?php $this->beginBody() ?>
@@ -178,6 +181,9 @@ input[type=date] {
     </header>
     <?php endif;?>
     <main class="main-content container <?=$classMod?>">
+        <div>
+            <?= Alert::widget(); ?>
+        </div>
         <?=$content; ?>
     </main>
     <?php if (Url::current() !== $urls[1] and Url::current() !== $urls[0]) :?>

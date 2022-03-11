@@ -47,7 +47,7 @@ foreach ($replies as $reply) {
                     preset: 'islands#redDotIconWithCaption'
                 });
             var myPlace = new ymaps.GeoObject(
-                {// Описание геометрии.
+                {   // Описание геометрии.
                     geometry: {
                         type: "Point",
                         coordinates: [<?=$geocode['lat']?>, <?=$geocode['lon']?>]
@@ -56,11 +56,9 @@ foreach ($replies as $reply) {
                     properties: {
                         // Контент метки.
                         iconContent: 'Место задания',
-                        //hintContent: 'Ну давай уже тащи'
                     }
                 }, 
-                {
-                    // Опции.
+                {   // Опции.
                     // Иконка метки будет растягиваться под размер ее содержимого.
                     preset: 'islands#redStretchyIcon',
                     // Метку можно перемещать.

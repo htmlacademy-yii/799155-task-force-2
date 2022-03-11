@@ -4,7 +4,6 @@ namespace app\models;
 
 use Yii;
 use yii\web\UploadedFile;
-//use \yii\db\ActiveRecord;
 use yii\base\Model;
 
 class ProfileFile extends Model

@@ -24,7 +24,7 @@ $config = [
                     'logVars' => ['_GET', '_POST']
                 ],
                 [
-                    'class' => 'yii\log\FileTarget', //в файл
+                    'class' => 'yii\log\FileTarget',
                     'categories' => ['controllers'], //категория логов
                     'logFile' => '@runtime/logs/controllers.log', //куда сохранять
                     'logVars' => [] //не добавлять в лог глобальные переменные ($_SERVER, $_SESSION...)
@@ -95,6 +95,17 @@ $config = [
                 'tasks/<page:\d+>' => 'tasks/index',
                 'contact' => 'site/contact',
                 'download/<docId:\d+>' => 'tasks/download',
+            ],
+        ],
+        'authClientCollection' => [
+            'class'   => 'yii\authclient\Collection',
+            'clients' => [
+                'vkontakte' => [
+                    'class'        => 'yii\authclient\clients\VKontakte',
+                    'clientId'     => $params['vkClientId'],
+                    'clientSecret' => $params['vkClientKey'],
+                    'scope' => 'email'
+                ],
             ],
         ],
     ],

@@ -49,7 +49,9 @@ class ProfileData extends Profile
         $prof->city = $this->town;
         $prof->last_act = date("Y-m-d H:i:s");
         if ($prof->update() === false) {
-            throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($prof));
+            $message = 'Не удалось сохранить профиль. Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($prof);
+            Yii::$app->getSession()->setFlash('error', $message);
         }
         $city = City::findOne(['name' => $this->town]);
         if (!$city) {
@@ -61,14 +63,18 @@ class ProfileData extends Profile
             $city = new City();
             $city->attributes = $props;
             if ($city->save() === false) {
-                throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($city));
+                $message = 'Не удалось сохранить город. Ошибка: ';
+                $message .= Yii::$app->helpers->getFirstErrorString($city);
+                Yii::$app->getSession()->setFlash('error', $message);
             }
         }
         $user->city_id = $city->id;
         $user->email = $this->email;
         $user->name = $this->name;
         if ($user->update() === false) {
-            throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($user));
+            $message = 'Не удалось сохранить пользователя. Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($user);
+            Yii::$app->getSession()->setFlash('error', $message);
         }
         return true;
     }
