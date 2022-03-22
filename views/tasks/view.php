@@ -95,8 +95,8 @@ foreach ($replies as $reply) {
                 <?= $form->field($reply, 'comment')->textarea(['autofocus' => true]) ?>
                 <?= $form->field($reply, 'price')->input('number') ?>
                 <div class="form-group">
-                    <button type="button" class="modal-button" data-dismiss="modal">Отменить</button>
-                    <button type="submit" class="modal-button"
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отменить</button>
+                    <button type="submit" class="btn btn-primary"
                         form="modal-form" name="reply" value="ok">Отправить</button>
                 </div>
             <?php ActiveForm::end(); ?>
@@ -116,9 +116,9 @@ foreach ($replies as $reply) {
             <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
                 <?= $form->field($reply, 'comment')->textarea(['autofocus' => true]) ?>
                 <div class="form-group">
-                    <button type="button" class="modal-button"
+                    <button type="button" class="btn btn-secondary"
                         data-dismiss="modal">Вернуться</button>
-                    <button type="submit" class="modal-button"
+                    <button type="submit" class="btn btn-primary"
                         form="modal-form" name="refuse" value="ok">Отказаться</button>
                 </div>
             <?php ActiveForm::end(); ?>
@@ -144,8 +144,8 @@ foreach ($replies as $reply) {
                 <?= $form->field($review, 'comment')->textarea(['autofocus' => true]) ?>
                 <?= $form->field($review, 'rating')->input('number', ['min' => '0', 'max' => '5']) ?>
                 <div class="form-group">
-                    <button type="button" class="modal-button" data-dismiss="modal">Вернуться</button>
-                    <button type="submit" class="modal-button" form="modal-form"
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Вернуться</button>
+                    <button type="submit" class="btn btn-primary" form="modal-form"
                         name="review" value="ok">Завершить</button>
                 </div>
             <?php ActiveForm::end(); ?>

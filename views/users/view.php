@@ -6,6 +6,19 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+//авторизованный пользователь
+$authUser = Yii::$app->helpers->checkAuthorization();
+
+$showContacts = true;
+
+if ($profile->customer_only) {
+    if ($authUser->contractor) {
+        $showContacts = false;
+    } else {
+        $showContacts = in_array($authUser->id, $user->customers);
+    }
+}
+
 ?>
 <div class="left-column">
     <h3 class="head-main"><?=Html::encode($user->name)?></h3>
@@ -42,7 +55,9 @@ use yii\helpers\Url;
             <p class="bio-info">
                 <span class="country-info">Россия</span>,
                 <span class="town-info"><?=$user->city?></span>,
+                <?php if ($user->born_date !== null) :?>
                 <span class="age-info"><?=Yii::$app->helpers->getAge($user->born_date)?></span> лет
+                <?php endif;?>
             </p>
         </div>
     </div>
@@ -88,6 +103,7 @@ use yii\helpers\Url;
                 <dd><?=$user->status?></dd>
         </dl>
     </div>
+    <?php if ($showContacts) :?>
     <div class="right-card white">
         <h4 class="head-card">Контакты</h4>
         <ul class="enumeration-list">
@@ -106,4 +122,5 @@ use yii\helpers\Url;
             <?php endif; ?>
         </ul>
     </div>
+    <?php endif;?>
 </div>

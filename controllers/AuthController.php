@@ -13,8 +13,8 @@ use yii\filters\VerbFilter;
 use app\models\Profile;
 use app\models\Source;
 use app\models\Location;
-use app\models\Client;
 use yii\web\ForbiddenHttpException;
+use TaskForce\logic\Client;
 
 class AuthController extends Controller
 {
@@ -66,13 +66,11 @@ class AuthController extends Controller
     public function actionRegistration()
     {
         $model = new Registration();
-        $cities = array_values(City::getCityNames());
-        if (Registration::registerUser($model, $cities)) {
+        if (Registration::registerUser($model)) {
             $this->goHome();
         }
         return $this->render('registration', [
             'model' => $model,
-            'cities' => $cities,
         ]);
     }
 
@@ -107,7 +105,11 @@ class AuthController extends Controller
         return $this->goHome();
     }
 
-    public function actionVkontakte($client = null)
+    /**
+     * Регистрация через аккаунт ВКонтакте
+     * @param Object $client - объект, передаваемый API VKontakte
+     */
+    public function actionVkontakte($client)
     {
         if ($client) {
             $model = new Client($client);

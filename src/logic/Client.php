@@ -1,12 +1,27 @@
 <?php
 
-namespace app\models;
+/**
+ * Класс содежит данные клинта,
+ * полученные от API ВКонтакте
+ * и служит для регистрации/авторизации на сайте
+ */
+
+namespace TaskForce\logic;
 
 use Yii;
-use yii\base\Model;
-
-class Client extends Model
+use app\models\User;
+use app\models\Profile;
+use app\models\Source;
+use app\models\Logon;
+use app\models\Location;
+use app\models\ProfileFile;
+/**
+ * Класс служит для регистрации пользователя
+ * через аккаунт ВКонтакте
+ */
+class Client
 {
+    public const PASSWORD_LENGTH = 8;
     public $source;
     public $sourceId;
     public $email;
@@ -15,6 +30,7 @@ class Client extends Model
     public $photo;
     public $bdate;
     public $check;
+    public $accessToken;
 
     public function __construct($client)
     {
@@ -28,6 +44,7 @@ class Client extends Model
         $this->bdate = date('Y-m-d', $time);
         $this->photo = $attributes['photo'];
         $this->check = 0;
+        $this->accessToken = $client->getAccessToken()->getParams()['access_token'];
     }
 
     public function attributeLabels()
@@ -55,6 +72,10 @@ class Client extends Model
         ];
     }
 
+    /**
+     * Призводит авторизацию пользователя
+     * через аккаунт ВКонтакте
+     */
     public function authorizeClient()
     {
         $auth = Source::find()->where(
@@ -82,7 +103,7 @@ class Client extends Model
                     $props = [
                         'name' => $this->name,
                         'email' => $this->email,
-                        'password' => Yii::$app->security->generateRandomString(6),
+                        'password' => Yii::$app->security->generateRandomString(self::PASSWORD_LENGTH),
                         'contractor' => 0,
                         'city_id' => $geoData['id'] ?? 0,
                     ];
@@ -91,7 +112,6 @@ class Client extends Model
                     if ($user->save()) {
                         $profile = new Profile();
                         $profile->user_id = $user->id;
-                        $profile->messenger = 'VK' . $this->sourceId;
                         $profile->last_act = date("Y-m-d H:i:s");
                         if (!empty($this->city)) {
                             $profile->city = $this->city;
@@ -100,25 +120,8 @@ class Client extends Model
                             $time = strtotime($this->bdate);
                             $profile->born_date = date('Y-m-d', $time);
                         }
-                        if (!empty($this->photo)) {
-                            $fileData = explode('?', $this->photo);
-                            $fileInfo = explode('/', $fileData[0]);
-                            $fileName = $fileInfo[count($fileInfo) - 1];
-                            $fileExt = strstr($fileName, '.');
-                            $fileName = uniqid('up') . $fileExt;
-                            $res = file_get_contents($attributes['photo']);
-                            if ($res !== false) {
-                                $handle = fopen(
-                                    Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $fileName,
-                                    'w'
-                                );
-                                if ($handle !== false) {
-                                    fwrite($handle, $res);
-                                    fclose($handle);
-                                }
-                                $profile->avatar = Yii::$app->params['uploadPath'] . $fileName;
-                            }
-                        }
+                        $profile->avatar = ProfileFile::AVATAR_ANONIM;
+                        /* Загрузка аватара выполнена в SiteController через Client::loadPhoto() */
                         if (!$profile->save()) {
                             $message = 'Не удалось сохранить профиль. Ошибка: ';
                             $message .= Yii::$app->helpers->getFirstErrorString($profile);
@@ -128,6 +131,8 @@ class Client extends Model
                         if ($auth->save()) {
                             $model = new Logon();
                             $model->logon($user, true);
+                            Yii::$app->getSession()['registration'] = true;
+                            Yii::$app->getSession()['token'] = $this->accessToken;
                         } else {
                             $message = 'Не удалось зарегистрировать пользователя. Ошибка: ';
                             $message .= Yii::$app->helpers->getFirstErrorString($auth);
@@ -149,5 +154,55 @@ class Client extends Model
                 Yii::$app->getSession()->setFlash('error', $message);
             }
         }
+    }
+
+    /**
+     * Загружает аватар пользователя
+     * который зарегистрировался через ВКонтакте
+     */
+    public static function loadPhoto(): bool
+    {
+        $user = Yii::$app->helpers->checkAuthorization();
+        if ($user !== null) {
+            $source = Source::findOne(['user_id' => $user->id]);
+            $profile = Profile::findOne(['user_id' => $user->id]);
+            if ($source !== null) {
+                //параметры запроса к API VKontakte
+                $method = 'photos.get';
+                $params = [
+                    'owner_id' => $source['source_id'],
+                    'album_id' => 'profile',
+                    'access_token' => Yii::$app->getSession()['token'],
+                    'v' => '5.131',
+                ];
+                //запрос на получение аватара из профиля VKontakte
+                $res = Yii::$app->helpers->api($method, $params);
+                if ($res['response']['count'] > 0) {
+                    $url = $res['response']['items'][0]['sizes'][0]['url'];
+                    $fileData = explode('?', $url);
+                    $fileInfo = explode('/', $fileData[0]);
+                    //имя файла аватара с расширением
+                    $fileName = $fileInfo[count($fileInfo) - 1];
+                    $fileExt = strstr($fileName, '.');
+                    //новое имя файла, с которым он будет скопирован в базу
+                    $fileName = uniqid('up') . $fileExt;
+                    //скопируем содержимое файла в базу
+                    $content = file_get_contents($url);
+                    if ($content !== false) {
+                        $handle = fopen(
+                            Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $fileName,
+                            'w'
+                        );
+                        if ($handle !== false) {
+                            fwrite($handle, $content);
+                            fclose($handle);
+                        }
+                        $profile->avatar = Yii::$app->params['uploadPath'] . $fileName;
+                        return $profile->update() !== false;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

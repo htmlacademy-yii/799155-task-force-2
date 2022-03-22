@@ -6,6 +6,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use app\assets\AppAsset;
+use yii\widgets\ActiveForm;
 
 AppAsset::register($this);
 
@@ -15,6 +16,11 @@ $user = Yii::$app->helpers->checkAuthorization();
 if ($user === null) {
     $userIsAuthorized = false;
 }
+//признак вывода модального окна для
+//загрузки аватара из ВКонтакте
+//true, если была выполнена регистрация пользователя
+//по аккаунту ВКонтакте
+$registration = Yii::$app->getSession()['registration'];
 
 ?>
 
@@ -144,6 +150,38 @@ if ($user === null) {
             </div>
         </div>
     </header>
+    <?php if ($registration) :?>
+    <!-- Modal -->
+    <div class="modal" id="client" style="display:block">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientLabel">Загрузка аватара из ВКонтакте</h5>
+            </div>
+            <form id="modal_form" method="post" action="site/index">
+                <div class="modal-body">
+                    <div>
+                    <input type="checkbox" id="modal_click" name="modal_zakaz"
+                            class="checkbox__legend" checked>
+                    <label for="modal_click">Я собираюсь откликаться на заказы</label>
+                    </div>
+                    <div>
+                    <input type="checkbox" id="modal_check" name="modal_photo"
+                            class="checkbox__legend" checked>
+                    <label for="modal_check">Загрузить аватар</label>
+                    </div>
+                    <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" 
+                                    value="<?= Yii::$app->request->getCsrfToken()?>" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="modal_submit" class="btn btn-primary">Выполнить</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <?php endif;?>
     <main>
         <div class="landing-container">
            <div class="landing-top">
@@ -152,7 +190,8 @@ if ($user === null) {
                <p>Сломался кран на кухне? Надо отправить документы? Нет времени самому гулять с собакой?
                    У нас вы быстро найдёте исполнителя для любой жизненной ситуации?<br>
                    Быстро, безопасно и с гарантией. Просто, как раз, два, три. </p>
-               <?=$userIsAuthorized ? '' : Html::a('Создать аккаунт', ['/registration',], ['class' => 'button']);?>
+               <?=$userIsAuthorized ? '' :
+                    Html::a('Создать аккаунт', ['/registration',], ['class' => 'button']);?>
            </div>
            <div class="landing-center">
                <div class="landing-instruction">
@@ -241,7 +280,8 @@ if ($user === null) {
                    <div class="landing-task">
                        <div class="landing-task-top task-<?=$task->code?>"></div>
                        <div class="landing-task-description">
-                           <h3><a href=<?='/task/' . $task->id?> class="link-regular"><?=$task->name?></a></h3>
+                           <h3><a href=<?='/task/' . $task->id?>
+                                class="link-regular"><?=$task->name?></a></h3>
                            <p><?=substr($task->description, 0, 60) . ' ...'?></p>
                        </div>
                        <div class="landing-task-info">
@@ -315,8 +355,18 @@ if ($user === null) {
         </div>
     </footer>
 </div>
-<div class="overlay"></div>
 <?php $this->endBody() ?>
 </body>
 </html>
 <?php $this->endPage() ?>
+
+<?php
+$js = <<<JS
+    var modal = $('#client');
+    var submit = $('#modal_submit');
+    submit.click(function(evt) {
+        modal.hide();
+    });
+JS;
+$this->registerJs($js);
+?>

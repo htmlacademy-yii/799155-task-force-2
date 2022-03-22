@@ -102,10 +102,13 @@ class Helpers extends Component
      * Возвращает разницу в годах
      * @param string $born дата в стоковом формате
      *
-     * @return int разница в годах
+     * @return int|null разница в годах
     */
-    public function getAge(string $born): int
+    public function getAge(?string $born): ?int
     {
+        if ($born === null) {
+            return null;
+        }
         $date = getdate(strtotime($born));
         $now = getdate();
         return $now['year'] - $date['year'];

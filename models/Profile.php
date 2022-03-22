@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property string|null $about_info дополнительная информация о себе
  * @property string|null $categories
  * @property string|null $city
+ * @property int $customer_only контакты показывать только для заказчика
  */
 class Profile extends ActiveRecord
 {
@@ -45,10 +46,11 @@ class Profile extends ActiveRecord
     {
         return [
             [['user_id'], 'integer'],
-            [['born_date', 'last_act', 'categories', 'city'], 'safe'],
+            [['born_date', 'last_act', 'categories', 'city', 'customer_only'], 'safe'],
             [['about_info', 'avatar'], 'string'],
             [['address'], 'string', 'max' => 256],
             [['phone', 'messenger', 'social_net'], 'string', 'max' => 32],
+            ['customer_only', 'integer'],
         ];
     }
 
@@ -70,6 +72,7 @@ class Profile extends ActiveRecord
             'about_info' => 'About Info',
             'categories' => 'Категории',
             'city' => 'Город',
+            'customer_only' => 'Информация только для заказчика',
         ];
     }
 }

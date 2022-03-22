@@ -249,6 +249,7 @@ class TasksSelector extends Task
             'budget',
             'tasks.add_date',
             'categories.name as category',
+            'custom_id'
         ];
         $query = self::find()->select(['tasks.id']);
         $query->where(['or' , ['custom_id' => $userId], ['contr_id' => $userId]]);

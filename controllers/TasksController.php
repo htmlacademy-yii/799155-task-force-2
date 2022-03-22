@@ -62,7 +62,7 @@ class TasksController extends SecuredController
         if (Action::doAction(Action::ACTION_START, $task, $this->user->id)) {
             $task->contr_id = $model->contr_id;
             if ($task->update() === false) {
-                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+                throw new \RuntimeException('Не удалось изменить данные задачи id ' . $task->id);
             }
         }
     }
@@ -243,7 +243,7 @@ class TasksController extends SecuredController
 
         if (Action::doAction(Action::ACTION_CANCEL, $task, $custom->id)) {
             if ($task->update() === false) {
-                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+                throw new \RuntimeException('Не удалось изменить данные задачи id ' . $task->id);
             }
         }
         return $this->redirect(['/task/' . $id]);
@@ -264,7 +264,7 @@ class TasksController extends SecuredController
         $task->budget = $reply->price;
         if (Action::doAction(Action::ACTION_COMPLETE, $task, $custom->id)) {
             if ($task->update() === false) {
-                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+                throw new \RuntimeException('Не удалось изменить данные задачи id ' . $task->id);
             }
         }
         return $this->refresh();

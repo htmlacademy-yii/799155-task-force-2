@@ -4,6 +4,9 @@ namespace app\models;
 
 use Yii;
 
+/**
+ * Класс для работы с профилем пользовтеля
+ */
 class ProfileData extends Profile
 {
     public $name;
@@ -26,6 +29,7 @@ class ProfileData extends Profile
         $this->about_info = $prof->about_info;
         $this->contractor = $user->contractor;
         $this->town = $prof->city;
+        $this->customer_only = 1;
     }
 
     public function rules()
@@ -36,9 +40,17 @@ class ProfileData extends Profile
             [['address'], 'string', 'max' => 256],
             [['phone', 'messenger', 'social_net'], 'string', 'max' => 32],
             [['name', 'email', 'messenger'], 'required', 'message' => 'Поле не может быть пустым'],
+            ['customer_only', 'integer'],
+            ['customer_only', 'safe'],
         ];
     }
 
+    /**
+     * Запись данных профиля в базу
+     * @param Profile $prof профиль пользователя
+     * @param User $user зарегистрированный пользователь
+     * @return bool true, если запись прошла успешно
+     */
     public function updateProfile($prof, $user): bool
     {
         $prof->phone = $this->phone;
@@ -47,6 +59,7 @@ class ProfileData extends Profile
         $prof->messenger = $this->messenger;
         $prof->about_info = $this->about_info;
         $prof->city = $this->town;
+        $prof->customer_only = $this->customer_only;
         $prof->last_act = date("Y-m-d H:i:s");
         if ($prof->update() === false) {
             $message = 'Не удалось сохранить профиль. Ошибка: ';

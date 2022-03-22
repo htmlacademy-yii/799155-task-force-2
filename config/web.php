@@ -95,6 +95,7 @@ $config = [
                 'tasks/<page:\d+>' => 'tasks/index',
                 'contact' => 'site/contact',
                 'download/<docId:\d+>' => 'tasks/download',
+                'change-password/<id:\d+>' => 'users/change-password',
             ],
         ],
         'authClientCollection' => [

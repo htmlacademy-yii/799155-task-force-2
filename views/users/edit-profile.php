@@ -12,6 +12,7 @@ $user = Yii::$app->helpers->checkAuthorization();
 
 ?>
 <head>
+<?= Html::csrfMetaTags() ?>
 <script type="text/javascript">
     ymaps.ready(init);
     function init() {
@@ -21,11 +22,10 @@ $user = Yii::$app->helpers->checkAuthorization();
 </script>
 <style>
 .regular-form {
-  width: 600px;
+  width: 640px;
 }
 </style>
 </head>
-
 <div class="my-profile-form">
     <h3 class="head-main head-regular">Мой профиль</h3>
     <div class="photo-editing">
@@ -47,27 +47,32 @@ $user = Yii::$app->helpers->checkAuthorization();
                 ],
                 'footer' => $user->name,
     ]);?>
-    <?php $modal = ActiveForm::begin(
-        ['id' => 'modal-form',],
-        ['options' => ['enctype' => 'multipart/form-data']]
-    );?>
-        <img src=<?=$model->avatar?> width="83" height="83">
+        <?php $modal = ActiveForm::begin(
+            ['id' => 'modal-form',],
+            ['options' => ['enctype' => 'multipart/form-data']]
+        );?>
+        <?php if ($model->avatar !== null) :?>
+            <img src=<?=$model->avatar?> width="83" height="83">
+        <?php else :?>
+            <img src=<?=ProfileFile::AVATAR_ANONIM?> width="83" height="83">
+        <?php endif;?>
             <?= $modal->field(
                 $avatar,
                 'file',
                 [
                     'labelOptions' => [
                         'class' => 'control-label',
-                        'label' => 'Сменить вавтвр',
+                        'label' => 'Сменить аватар',
                     ],
                 ]
             )->fileInput(['accept' => 'image/*']);?>
-            <div class="control-label">
-                <button type="button" class="modal-button" data-dismiss="modal">Отменить</button>
-                <button type="submit" class="modal-button" name="modal" value="file">Принять</button>
-            </div>
-    <?php ActiveForm::end(); ?>
+        <div class="control-label">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отменить</button>
+            <button type="submit" class="btn btn-primary" name="modal" value="file">Принять</button>
+        </div>
+        <?php ActiveForm::end(); ?>
     <?php Modal::end(); ?>
+    <?= Html::a('Заменить пароль', ['/change-password/' . $user->id,], ['class' => 'button red-button']);?>
 </div>
 <div class="regular-form my-profile-form">
     <?php $form = ActiveForm::begin(['id' => 'my-profile-form',]);?>
@@ -164,7 +169,7 @@ $user = Yii::$app->helpers->checkAuthorization();
                             'class' => 'form-label',
                         ],
                     ]
-                )->input('text')->label('Ваш Мессенджер');?>
+                )->input('text')->label('Ваш Telegram');?>
             </div>
         </div>
         <div class="form-group">
@@ -210,7 +215,29 @@ $user = Yii::$app->helpers->checkAuthorization();
                     );?>
             </div>
         </div>
-        <?php endif;?>
+        <div class="form-group">
+            <?php
+                $params = [
+                    'label' => 'Показывать мои контакты только заказчику',
+                    'uncheck' => false,
+                    //template уехал в params из-за yii\bootstrap4\ActiveForm
+                    'template' => '{input}<label class="control-label"
+                        for="profiledata-customer_only">{label}</label>',
+                ];
+                echo $form->field(
+                    $model,
+                    'customer_only',
+                    [
+                        'labelOptions' => [
+                            'class' => 'form-label',
+                        ],
+                    ]
+                )->checkbox($params, false);
+            ?>
+        </div>
+        <?php endif;?> <!--if ($model->contractor)-->
+
+
         <div class="left-column">
             <?= Html::submitButton(
                 'Сохранить',
@@ -224,6 +251,7 @@ $user = Yii::$app->helpers->checkAuthorization();
         </div>
     <?php ActiveForm::end(); ?>
 </div>
+
 <?php
 $js = <<<JS
 var address = $('#profiledata-address'),

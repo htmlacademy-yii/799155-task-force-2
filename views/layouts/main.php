@@ -155,7 +155,7 @@ input[type=date] {
             </div>
         </nav>
         <div class="user-block" <?=$hidden?>>
-            <a href="#">
+            <a href=<?='/edit-profile/' . $user->id;?>>
                 <img class="user-photo" src=<?=Url::to($avatar, true);?>
                     width="55" height="55" alt="Аватар">
             </a>

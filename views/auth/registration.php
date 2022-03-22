@@ -2,7 +2,6 @@
 
 /* @var $this yii\web\View */
 /* @var $model регистрационная информация */
-/* @var $cities перечень городов*/
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -142,7 +141,8 @@ use yii\authclient\widgets\AuthChoice;
                             'labelOptions' => [
                                 'class' => 'head-card',
                             ],
-                            'template' => '{input}<label class="control-label" 
+                            //template здесь из-за yii\widget\ActiveForm
+                            'template' => '{input}<label class="control-label"
                                         for="registration-contractor">{label}</label>',
                         ]
                     )->checkbox($options, false);

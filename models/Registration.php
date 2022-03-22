@@ -36,11 +36,10 @@ class Registration extends User
     /**
      * Регистрация подьзователя
      * @param Registration $model данные формы регистрации
-     * @param array $cities массив имен городов, передаваемых в форму регистрации
      *
      * @return true|false в случае, если форма не содержала ошибок - true
      */
-    public static function registerUser(Registration $model, array $cities): bool
+    public static function registerUser(Registration $model): bool
     {
         $request = Yii::$app->request;
         if ($request->isPost) {

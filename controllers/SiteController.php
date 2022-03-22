@@ -12,6 +12,7 @@ use app\models\Categories;
 use app\models\User;
 use app\models\Contact;
 use yii\data\Pagination;
+use TaskForce\logic\Client;
 
 class SiteController extends Controller
 {
@@ -48,7 +49,21 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        if (is_object(Yii::$app->user)) {
+        $auth = Yii::$app->getSession()['registration'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['modal_photo']) and $_POST['modal_photo'] === 'on') {
+                Client::loadPhoto();
+            }
+            if (isset($_POST['modal_zakaz']) and $_POST['modal_zakaz'] === 'on') {
+                $user = User::findIdentity(Yii::$app->user->getId());
+                $user->contractor = 1;
+                $user->update(false, ['contractor']); 
+            }
+            Yii::$app->getSession()['registration'] = false;
+            unset(Yii::$app->getSession()['token']);
+            $auth = false;
+        }
+        if (!$auth and is_object(Yii::$app->user)) {
             $user = User::findIdentity(Yii::$app->user->getId());
             if (is_object($user)) {
                 return $this->redirect(['/tasks']);
