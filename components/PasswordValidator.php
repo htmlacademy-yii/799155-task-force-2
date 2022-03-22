@@ -15,10 +15,10 @@ use TaskForce\logic\Client;
 class PasswordValidator extends Validator
 {
     const TEST_WEAK = 0;
-	const TEST_STRONG = 1;
+    const TEST_STRONG = 1;
 
     public $strength;
- 
+
     private $weak_pattern = '/^(?=.*[a-zA-Z0-9]).{5,}$/';
     private $strong_pattern = '/^(?=.*\d(?=.*\d))(?=.*[a-zA-Z](?=.*[a-zA-Z])).{5,}$/';
 
@@ -59,7 +59,6 @@ class PasswordValidator extends Validator
         $pass = json_encode($password, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $res = password_verify($password, $model->userPasswordHash) ? 1 : 0;
         return <<< JS
-            
             if ($res == 0) {
                 messages.push($message);
                 console.log('fail verify password ' + $pass);
@@ -81,7 +80,6 @@ class PasswordValidator extends Validator
         } elseif ($this->strength === self::TEST_STRONG) {
             $pattern = $this->strong_pattern;
         }
-    
         // получаем значение атрибута модели и проверяем по паттерну
         if (!preg_match($pattern, $this->password_repeat)) {
             $this->addError($attribute, 'Пароль слишком слабый');

@@ -26,9 +26,12 @@ $user = Yii::$app->helpers->checkAuthorization();
             <div class="half-wrapper">
                 <div class="form-group">
                     <?= $form->field($model, 'userPasswordHash')->hiddenInput()->label(false); ?>
-                    <?= $form->field($model, 'userPasswordOld')->input('password')->label('Введите текущий пароль'); ?>
-                    <?= $form->field($model, 'password_repeat')->input('password')->label('Введите новый пароль'); ?>
-                    <?= $form->field($model, 'password')->input('password')->label('Повторите новый пароль'); ?>
+                    <?= $form->field($model, 'userPasswordOld')->
+                        input('password')->label('Введите текущий пароль'); ?>
+                    <?= $form->field($model, 'password_repeat')->
+                        input('password')->label('Введите новый пароль'); ?>
+                    <?= $form->field($model, 'password')->
+                        input('password')->label('Повторите новый пароль'); ?>
                 </div>
             </div>
                 <div class="form-group">

@@ -20,7 +20,11 @@ if ($user === null) {
 //загрузки аватара из ВКонтакте
 //true, если была выполнена регистрация пользователя
 //по аккаунту ВКонтакте
-$registration = Yii::$app->getSession()['registration'];
+$registration = false;
+if (isset(Yii::$app->getSession()['registration'])) {
+    $registration = Yii::$app->getSession()['registration'];
+    unset(Yii::$app->getSession()['registration']);
+}
 
 ?>
 
