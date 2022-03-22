@@ -24,6 +24,10 @@ $user = Yii::$app->helpers->checkAuthorization();
 .regular-form {
   width: 640px;
 }
+.my-profile-form input[type=date],
+.my-profile-form .half-wrapper input[type=text] {
+  width: 220px; 
+}
 </style>
 </head>
 <div class="my-profile-form">
