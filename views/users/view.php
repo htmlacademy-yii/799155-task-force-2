@@ -1,7 +1,9 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $user данные пользователя*/
+/* @var $user User данные пользователя*/
+/* @var $profile  Profile профиль пользователя*/
+/* @var $review Review отзыв о выполненной работе пользователя */
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -18,6 +20,7 @@ if ($profile->customer_only) {
         $showContacts = in_array($authUser->id, $user->customers);
     }
 }
+$age = Yii::$app->helpers->getAge($user->born_date);
 
 ?>
 <div class="left-column">
@@ -45,7 +48,8 @@ if ($profile->customer_only) {
             <ul class="special-list">
                 <?php foreach ($user->categories as $category) :?>
                     <li class="special-item">
-                        <a href=<?='/category/' . $category->id?> class="link link--regular"><?=$category->name?></a>
+                        <a href=<?='/category/' . $category->id?>
+                            class="link link--regular"><?=$category->name?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -54,9 +58,10 @@ if ($profile->customer_only) {
             <p class="head-info">Био</p>
             <p class="bio-info">
                 <span class="country-info">Россия</span>,
-                <span class="town-info"><?=$user->city?></span>,
+                <span class="town-info"><?=$user->city?></span>
                 <?php if ($user->born_date !== null) :?>
-                <span class="age-info"><?=Yii::$app->helpers->getAge($user->born_date)?></span> лет
+                <span class="age-info"><?=', ' . $age .
+                    Yii::$app->helpers->getNounPluralForm($age, ' год', ' года', ' лет')?></span>
                 <?php endif;?>
             </p>
         </div>
