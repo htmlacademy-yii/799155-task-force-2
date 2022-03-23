@@ -47,25 +47,3 @@ $user = Yii::$app->helpers->checkAuthorization();
         <?php ActiveForm::end(); ?>
     </div>
 </div>
-
-<?php
-$js = <<<JS
-var password = $('#password-userpassword2');
-var form = $('#registration-form');
-password.on('blur', function(evt) {
-    var data = form.serialize();
-    $.ajax({
-        type: 'post',
-        data: data,
-        success: function(res, status) {
-            console.log(res);
-        },
-        error: function(request, status, error) {
-            console.log('error: ' + status);
-        }
-    });
-});
-JS;
-$this->registerJs($js);
-?>
-
