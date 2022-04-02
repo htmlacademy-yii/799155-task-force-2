@@ -29,7 +29,8 @@ class TasksController extends SecuredController
         $pages->pageSize = TasksSelector::TASKS_PER_PAGE;
         $tasks = TasksSelector::selectTasks($categories, $statuses, $pages, $userId);
         $categoryNames[Categories::MAIN_CATEGORIES] = Category::getCategoryNames();
-        $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
+        $categoryNames[Categories::ADD_CONDITION] = 'Без откликов исполнителей';
+        $categoryNames[Categories::MORE_CONDITION] = 'Удаленная работа';
         $categoryNames[Categories::PERIODS] = array_map(
             function ($key, $value) {
                 return $key . ' ' . $value;
@@ -131,8 +132,8 @@ class TasksController extends SecuredController
         $doc = Document::findOne($docId);
         if ($doc) {
             return Yii::$app->response->sendFile(
-                Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $doc->fname, 
-                $doc->doc, 
+                Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $doc->fname,
+                $doc->doc,
                 [ 'inline' => false,]
             );
         }

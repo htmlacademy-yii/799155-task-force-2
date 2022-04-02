@@ -2,6 +2,9 @@
 
 /* @var $this yii\web\View */
 /* @var $tasks массив заданий*/
+/* @var $categories Categories*/
+/* @var $categoryNames array список названий категорий */
+/* @var $page int номер страницы пгинации*/
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -22,7 +25,7 @@ if (strstr(Url::current(), 'category') === false) {
         if (strstr(Url::current(), $key) !== false) {
             $title = $value;
             break;
-        } 
+        }
     }
 } else {
     $title = $categoryNames[Categories::MAIN_CATEGORIES][$categories->categoriesCheckArray[0]];
@@ -33,7 +36,7 @@ if (strstr(Url::current(), 'category') === false) {
 <div class="left-column">
     <h3 class="head-main head-task"><?=$title?></h3>
     <?php foreach ($tasks as $task) : ?>
-        <div class="task-card">
+    <div class="task-card">
         <div class="header-task">
             <a  href=<?='/task/' . $task->id?> class="link link--block link--big"><?=Html::encode($task->name)?></a>
             <?php if (!empty($task->budget)) :?>
@@ -121,6 +124,21 @@ if (strstr(Url::current(), 'category') === false) {
                         ],
                         'template' => '{input}<label class="control-label" 
                                     for="categories-additioncategorycheck">{label}</label>',
+                    ]
+                )->checkbox($options, false);
+                $options = [
+                    'label' => $categoryNames[Categories::MORE_CONDITION],
+                    'uncheck' => Categories::NO_ADDITION_SELECTED,
+                ];
+                echo $form->field(
+                    $categories,
+                    'moreConditionCheck',
+                    [
+                        'labelOptions' => [
+                            'class' => 'head-card',
+                        ],
+                        'template' => '{input}<label class="control-label" 
+                                    for="categories-moreconditioncheck">{label}</label>',
                     ]
                 )->checkbox($options, false);
                 ?>
