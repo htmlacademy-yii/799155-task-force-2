@@ -46,7 +46,9 @@ class UsersController extends SecuredController
         $user = User::findOne($id);
         $profile = new ProfileData($prof, $user);
         $avatar = new ProfileFile();
-        $profile->categoriesCheckArray = ProfileData::decodeCategories($prof->categories);
+        if (!empty($prof->categories)) {
+            $profile->categoriesCheckArray = ProfileData::decodeCategories($prof->categories);
+        }
 
         if (Yii::$app->request->isPost) {
             if (Yii::$app->request->post('modal') === 'file') {

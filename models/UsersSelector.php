@@ -52,7 +52,7 @@ class UsersSelector extends User
         ]);
         $query->where(['users.id' => $userId]);
         $query = $query->
-            innerJoin('cities', 'city_id = cities.id')->
+            leftJoin('cities', 'city_id = cities.id')->
             innerJoin('profiles', 'users.id = profiles.user_id');
         $user = $query->one();
         if ($user === null) {

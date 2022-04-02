@@ -20,15 +20,31 @@ class ProfileData extends Profile
     public function __construct($prof, $user)
     {
         $this->name = $user->name;
-        $this->phone = $prof->phone;
-        $this->address = $prof->address;
-        $this->email = $user->email;
-        $this->avatar = $prof->avatar;
-        $this->born_date = $prof->born_date;
-        $this->messenger = $prof->messenger;
-        $this->about_info = $prof->about_info;
+        if (!empty($prof->phone)) {
+            $this->phone = $prof->phone;
+        }
+        if (!empty($prof->address)) {
+            $this->address = $prof->address;
+        }
+        if (!empty($user->email)) {
+            $this->email = $user->email;
+        }
+        if (!empty($prof->avatar)) {
+            $this->avatar = $prof->avatar;
+        }
+        if (!empty($prof->born_date)) {
+            $this->born_date = $prof->born_date;
+        }
+        if (!empty($prof->messenger)) {
+            $this->messenger = $prof->messenger;
+        }
+        if (!empty($prof->about_info)) {
+            $this->about_info = $prof->about_info;
+        }
         $this->contractor = $user->contractor;
-        $this->town = $prof->city;
+        if (!empty($prof->city)) {
+            $this->town = $prof->city;
+        }
         $this->customer_only = 1;
     }
 
