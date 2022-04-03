@@ -46,9 +46,7 @@ class UsersController extends SecuredController
         $user = User::findOne($id);
         $profile = new ProfileData($prof, $user);
         $avatar = new ProfileFile();
-        if (!empty($prof->categories)) {
-            $profile->categoriesCheckArray = ProfileData::decodeCategories($prof->categories);
-        }
+        $profile->categoriesCheckArray = ProfileData::decodeCategories($prof->categories);
 
         if (Yii::$app->request->isPost) {
             if (Yii::$app->request->post('modal') === 'file') {
@@ -81,18 +79,25 @@ class UsersController extends SecuredController
         }
         $user = User::findOne($id);
         $pwd = new Password($user);
+        $result = false;
         if (Yii::$app->request->isPost) {
             if (Yii::$app->request->post('replace') === 'ok') {
                 $pwd->load(Yii::$app->request->post());
                 if ($pwd->validate()) {
-                    $pwd->updatePassword($user);
-                    return $this->redirect('/edit-profile/' . $user->id);
+                    $result = $pwd->updatePassword($user);
                 }
             }
             if (Yii::$app->request->post('back') === 'cancel') {
                 return $this->goBack();
             }
         }
-        return $this->render('change-password', ['model' => $pwd,]);
+        return $this->render(
+            'change-password',
+            [
+                'model' => $pwd,
+                'result' => $result,
+                'url' => '/edit-profile/' . $user->id,
+            ]
+        );
     }
 }

@@ -9,7 +9,16 @@ use yii\widgets\ActiveField;
 use yii\authclient\widgets\AuthChoice;
 
 ?>
-
+<head>
+<style>
+.button--black {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    padding: 15px 60px;
+    margin-right: 500px;
+}
+</style>
+</head>
 <div class="center-block container--registration">
     <div class="regular-form">
         <?php $form = ActiveForm::begin([
@@ -46,11 +55,11 @@ use yii\authclient\widgets\AuthChoice;
                 </div>
             </div>
             <div class="form-group">
-                <?= Html::submitButton('Войти', ['class' => 'button button--blue']) ?>
+                <?= Html::submitButton('Войти', ['class' => 'button button--black']) ?>
             </div>
             <div>
                 <p>Вход через ВКонтакте</p>
-                <?php 
+                <?php
                     echo yii\authclient\widgets\AuthChoice::widget(
                         [
                             'baseAuthUrl' => ['auth/vkontakte'],

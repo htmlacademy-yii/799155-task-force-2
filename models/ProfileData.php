@@ -26,9 +26,7 @@ class ProfileData extends Profile
         if (!empty($prof->address)) {
             $this->address = $prof->address;
         }
-        if (!empty($user->email)) {
-            $this->email = $user->email;
-        }
+        $this->email = $user->email;
         if (!empty($prof->avatar)) {
             $this->avatar = $prof->avatar;
         }

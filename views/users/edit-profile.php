@@ -1,5 +1,10 @@
 <?php
 
+/* @var $this \yii\web\View */
+/* @var $model ProfileData */
+/* @var $catName array of category names*/
+/* @var $avatar ProfileFile */
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap4\ActiveForm;
@@ -24,9 +29,25 @@ $user = Yii::$app->helpers->checkAuthorization();
 .regular-form {
   width: 640px;
 }
+.my-profile-form {
+  margin-left: 0;
+}
+.my-profile-form .half-wrapper .address input[type=text] {
+    width:540px;
+    margin-bottom:-40px;
+}
 .my-profile-form input[type=date],
 .my-profile-form .half-wrapper input[type=text] {
-  width: 220px; 
+  width: 220px;
+}
+.my-profile-form .form-group input[type=text] {
+  width: 260px;
+}
+.button--black {
+    margin-bottom: 15px;
+}
+.button--black:hover {
+    color: #ffffff;
 }
 </style>
 </head>
@@ -47,7 +68,7 @@ $user = Yii::$app->helpers->checkAuthorization();
                 'toggleButton' => [
                     'label' => 'Сменить аватар',
                     'tag' => 'button',
-                    'class' => 'button button--blue',
+                    'class' => 'button button--black',
                 ],
                 'footer' => $user->name,
     ]);?>
@@ -76,11 +97,17 @@ $user = Yii::$app->helpers->checkAuthorization();
         </div>
         <?php ActiveForm::end(); ?>
     <?php Modal::end(); ?>
-    <?= Html::a('Заменить пароль', ['/change-password/' . $user->id,], ['class' => 'button red-button']);?>
+    <div>
+    <?= Html::a(
+        'Заменить пароль',
+        ['/change-password/' . $user->id,],
+        ['class' => 'button button--black', 'style' => 'text-decoration:none']
+    );?>
+    </div>
 </div>
 <div class="regular-form my-profile-form">
     <?php $form = ActiveForm::begin(['id' => 'my-profile-form',]);?>
-        <div class="form-group">
+        <div>
             <?php echo $form->field(
                 $model,
                 'name',
@@ -91,15 +118,16 @@ $user = Yii::$app->helpers->checkAuthorization();
                 ]
             )->input('text')->label('Ваше имя');?>
         </div>
-        <div class="form-group">
-            <?php echo $form->field(
-                $model,
-                'address',
-                [
-                    'labelOptions' => [
-                        'class' => 'form-label',
-                    ],
-                ]
+        <div  class="half-wrapper">
+            <div class="address">
+                <?php echo $form->field(
+                    $model,
+                    'address',
+                    [
+                        'labelOptions' => [
+                            'class' => 'form-label',
+                        ],
+                    ]
                 )->input('text')->label('Ваш адрес');
                 echo $form->field(
                     $model,
@@ -128,10 +156,11 @@ $user = Yii::$app->helpers->checkAuthorization();
                         ],
                     ]
                 )->hiddenInput();
-            ?>
+                ?>
+            </div>
         </div>
         <div class="half-wrapper">
-            <div class="form-group">
+            <div>
                 <?php echo $form->field(
                     $model,
                     'email',
@@ -142,7 +171,7 @@ $user = Yii::$app->helpers->checkAuthorization();
                     ]
                 )->input('email')->label('Электронная почта');?>
             </div>
-            <div class="form-group">
+            <div>
                 <?php echo $form->field(
                     $model,
                     'born_date',
@@ -240,13 +269,11 @@ $user = Yii::$app->helpers->checkAuthorization();
             ?>
         </div>
         <?php endif;?> <!--if ($model->contractor)-->
-
-
         <div class="left-column">
             <?= Html::submitButton(
                 'Сохранить',
                 [
-                    'class' => 'button button--blue',
+                    'class' => 'button button--black',
                     'form' => 'my-profile-form',
                     'name' => 'form',
                     'value' => 'save',
