@@ -57,7 +57,7 @@ class SiteController extends Controller
             if (isset($_POST['modal_zakaz']) and $_POST['modal_zakaz'] === 'on') {
                 $user = User::findIdentity(Yii::$app->user->getId());
                 $user->contractor = 1;
-                $user->update(false, ['contractor']); 
+                $user->update(false, ['contractor']);
             }
             Yii::$app->getSession()['registration'] = false;
             unset(Yii::$app->getSession()['token']);
@@ -88,13 +88,7 @@ class SiteController extends Controller
                 $contact->load(Yii::$app->request->post());
                 $contact->send();
             }
-            if (Yii::$app->request->post('modal-button') === 'ok') {
-                $contact->load(Yii::$app->request->post());
-                if ($contact->sendOk) {
-                    return $this->goBack();
-                }
-            }
         }
-        return $this->render('contact', ['model' => $contact]);
+        return $this->render('contact', ['model' => $contact, 'url' => Yii::$app->user->getReturnUrl()]);
     }
 }
