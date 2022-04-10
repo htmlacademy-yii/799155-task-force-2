@@ -33,6 +33,7 @@ $user = Yii::$app->helpers->checkAuthorization();
             ]); ?>
             <h2 class="head-main head-regular">Изменение пароля</h2>
             <!-- Modal -->
+            <div class="overlay" id="overlay"></div>
             <div class="modal" tabindex="-1" id="modal" role="dialog">
                 <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
                     <div class="modal-content">
@@ -77,14 +78,17 @@ $(document).ready(function(){
     var modal = $('#modal');
     var url = $('#url').val();
     var result = $('#result').val();
+    var overlay = $('#overlay');
     if (result) {
-            modal.fadeIn(500);
-            setTimeout(function () {
-                modal.fadeOut(3000);
-                $(location).attr('href', url);
-            }, 3000);
-        }
-    });
+        overlay.fadeIn();
+        modal.fadeIn(500);
+        setTimeout(function () {
+            modal.fadeOut(3000);
+            overlay.fadeOut();
+            $(location).attr('href', url);
+        }, 3000);
+    }
+});
 JS;
 $this->registerJs($js);
 ?>

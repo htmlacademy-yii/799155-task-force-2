@@ -29,12 +29,13 @@ $this->title = 'Контакт';
 <div class="regular-form">
     <h1><?= Html::encode($this->title);?></h1>
         <!-- Modal -->
+        <div class="overlay" id="overlay"></div>
         <div class="modal" tabindex="-1" id="modal" role="dialog">
             <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 id="label">Благодарим Вас за то, что обратились к нам.
-                            Мы ответим Вам как можно скорее.</h2>
+                        <p id="label">Благодарим Вас за то, что обратились к нам.
+                            Мы ответим Вам как можно скорее.</p>
                         <div><input type="hidden" id="url" value="<?=$url?>"></input></div>
                         <div><input type="hidden" id="result" value="<?=$model->sendOk?>"></input></div>
                     </div>
@@ -76,15 +77,18 @@ $js = <<<JS
 $(document).ready(function(){
     var modal = $('#modal');
     var url = $('#url').val();
+    var overlay = $('#overlay');
     var result = $('#result').val();
     if (result) {
-            modal.fadeIn(500);
-            setTimeout(function () {
-                modal.fadeOut(3000);
-                $(location).attr('href', url);
-            }, 5000);
-        }
-    });
+        overlay.fadeIn();
+        modal.fadeIn(500);
+        setTimeout(function () {
+            modal.fadeOut(3000);
+            overlay.fadeOut();
+            $(location).attr('href', url);
+        }, 5000);
+    }
+});
 JS;
 $this->registerJs($js);
 ?>

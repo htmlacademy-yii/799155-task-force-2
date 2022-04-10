@@ -154,10 +154,10 @@ if (isset(Yii::$app->getSession()['registration'])) {
             </div>
         </div>
     </header>
-    <?php if ($registration) :?>
-    <!-- Modal -->
-    <div class="modal" id="client" style="display:block">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="overlay" id="overlay"></div>
+    <input type="hidden" id="show" value="<?=$registration ? '1' : '0';?>" />
+    <div class="modal" id="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="clientLabel">Загрузка аватара из ВКонтакте</h5>
@@ -184,8 +184,6 @@ if (isset(Yii::$app->getSession()['registration'])) {
         </div>
         </div>
     </div>
-    <!-- Modal -->
-    <?php endif;?>
     <main>
         <div class="landing-container">
            <div class="landing-top">
@@ -366,10 +364,18 @@ if (isset(Yii::$app->getSession()['registration'])) {
 
 <?php
 $js = <<<JS
-    var modal = $('#client');
+    var modal = $('#modal');
     var submit = $('#modal_submit');
+    var overlay = $('#overlay'),
+        show = $('#show');
+    if (show.val() == 1) {
+        overlay.fadeIn();
+        modal.fadeIn(500);
+    }
     submit.click(function(evt) {
-        modal.hide();
+        modal.fadeOut(1000);
+        overlay.fadeOut();
+        show.val(0);
     });
 JS;
 $this->registerJs($js);
