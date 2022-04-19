@@ -6,7 +6,8 @@
 *.sublime*
 
 #upload files
-/web/uploads
+/web/uploads/*
+!/web/uploads/.gitkeep
 
 #fixtures data files
 /fixtures/data
