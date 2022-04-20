@@ -8,6 +8,7 @@ use app\models\TasksSelector;
 use app\models\ReviewsSelector;
 use TaskForce\exception\TaskForceException;
 use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
 
 class UsersSelector extends User
 {
@@ -25,6 +26,7 @@ class UsersSelector extends User
     public $phone;
     public $messenger;
     public $categories;
+    public $customers = []; //массив заказчиков для этого исполнителя
 
     /**
      * Возвращает пользователя с заданным id
@@ -50,7 +52,7 @@ class UsersSelector extends User
         ]);
         $query->where(['users.id' => $userId]);
         $query = $query->
-            innerJoin('cities', 'city_id = cities.id')->
+            leftJoin('cities', 'city_id = cities.id')->
             innerJoin('profiles', 'users.id = profiles.user_id');
         $user = $query->one();
         if ($user === null) {
@@ -64,6 +66,9 @@ class UsersSelector extends User
         $user->refuseCounter = count($tasks);
         $tasks = TasksSelector::selectTasksByStatus($userId, [TasksSelector::STATUS_ON_DEAL], $pages);
         $user->status = count($tasks) ? self::STATUS_BUSY : self::STATUS_FREE;
+        if (count($tasks)) {
+            $user->customers = ArrayHelper::getColumn($tasks, 'custom_id');
+        } 
         $result = ReviewsSelector::getRating($userId);
         $user->stars = [];
         $user->stars = array_pad($user->stars, round($result[1]), true);

@@ -15,12 +15,16 @@ use app\models\ProfileFile;
 use yii\web\UploadedFile;
 use app\models\Categories;
 use app\models\User;
+use app\models\Password;
+use yii\bootstrap4\ActiveForm;
+use yii\web\Response;
 
 class UsersController extends SecuredController
 {
     public function actionView(int $id)
     {
         $user = UsersSelector::selectUser($id);
+        $profile = Profile::findOne(['user_id' => $id]);
         if (!$user->contractor) {
             throw new NotFoundHttpException('У Вас нет доступа к этой странице');
         }
@@ -28,6 +32,7 @@ class UsersController extends SecuredController
         return $this->render('view', [
             'user' => $user,
             'reviews' => $reviews,
+            'profile' => $profile,
         ]);
     }
 
@@ -42,6 +47,7 @@ class UsersController extends SecuredController
         $profile = new ProfileData($prof, $user);
         $avatar = new ProfileFile();
         $profile->categoriesCheckArray = ProfileData::decodeCategories($prof->categories);
+
         if (Yii::$app->request->isPost) {
             if (Yii::$app->request->post('modal') === 'file') {
                 $avatar->file = UploadedFile::getInstance($avatar, 'file');
@@ -64,5 +70,34 @@ class UsersController extends SecuredController
             'avatar' => $avatar,
             'catNames' => $categoryNames,
         ]);
+    }
+
+    public function actionChangePassword(int $id)
+    {
+        if (Yii::$app->helpers->checkAuthorization()->id !== $id) {
+            throw new ForbiddenHttpException('Вам запрещён доступ!');
+        }
+        $user = User::findOne($id);
+        $pwd = new Password($user);
+        $result = false;
+        if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->post('replace') === 'ok') {
+                $pwd->load(Yii::$app->request->post());
+                if ($pwd->validate()) {
+                    $result = $pwd->updatePassword($user);
+                }
+            }
+            if (Yii::$app->request->post('back') === 'cancel') {
+                return $this->goBack();
+            }
+        }
+        return $this->render(
+            'change-password',
+            [
+                'model' => $pwd,
+                'result' => $result,
+                'url' => '/edit-profile/' . $user->id,
+            ]
+        );
     }
 }

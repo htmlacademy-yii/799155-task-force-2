@@ -2,12 +2,12 @@
 
 /* @var $this yii\web\View */
 /* @var $model регистрационная информация */
-/* @var $cities перечень городов*/
 
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\ActiveField;
+use yii\authclient\widgets\AuthChoice;
 
 ?>
 
@@ -19,11 +19,28 @@ use yii\widgets\ActiveField;
             var suggestView = new ymaps.SuggestView('registration-city_name');
         };
 </script>
-</head>
 <style>
 .registration-form .form-group input[type=text] {
-  width: 300px; }
+  width: 300px;
+}
+.button--black {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    padding: 15px 60px;
+    margin-right: 500px;
+}
+.bottom-container {
+  width: 300px;
+  margin: 0 auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  padding-bottom: 30px;
+}
 </style>
+</head>
 
 <div class="center-block container--registration">
     <div class="regular-form">
@@ -141,14 +158,24 @@ use yii\widgets\ActiveField;
                             'labelOptions' => [
                                 'class' => 'head-card',
                             ],
-                            'template' => '{input}<label class="control-label" 
+                            //template здесь из-за yii\widget\ActiveForm
+                            'template' => '{input}<label class="control-label"
                                         for="registration-contractor">{label}</label>',
                         ]
                     )->checkbox($options, false);
                     ?>
             </div>
-            <div class="form-group">
-                <?= Html::submitButton('Создать аккаунт', ['class' => 'button button--blue']) ?>
+            <div class="landing-bottom-container">
+                <?= Html::submitButton('Создать аккаунт', ['class' => 'button button--black']) ?>
+            </div>
+            <div>
+                <p>Вход через ВКонтакте</p>
+                <?php
+                    echo yii\authclient\widgets\AuthChoice::widget(
+                        [
+                            'baseAuthUrl' => ['auth/vkontakte'],
+                        ]
+                    );?>
             </div>
         <?php ActiveForm::end(); ?>
     </div>

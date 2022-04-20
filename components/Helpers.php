@@ -100,12 +100,15 @@ class Helpers extends Component
 
     /**
      * Возвращает разницу в годах
-     * @param string $date дата в стоковом формате
+     * @param string $born дата в стоковом формате
      *
-     * @return int разница в годах
+     * @return int|null разница в годах
     */
-    public function getAge($born): int
+    public function getAge(?string $born): ?int
     {
+        if ($born === null) {
+            return null;
+        }
         $date = getdate(strtotime($born));
         $now = getdate();
         return $now['year'] - $date['year'];
@@ -208,5 +211,24 @@ class Helpers extends Component
         $ext = substr($fname, strpos($fname, '.'), 5);
         $shortName = substr($fname, 0, 20) . '... ' . $ext;
         return $shortName;
+    }
+
+    /**
+     * Получает информацию о ресурсе из Вконтакте
+     * Пример использования для получения списка фотографий
+     *   $method = 'photos.get';
+     *   $params = [
+     *       'owner_id' => $attributes['user_id'],
+     *       'album_id' => 'profile',
+     *       'access_token' => $client->getAccessToken()->getParams()['access_token'],
+     *       'v' => '5.131',
+     *   ];
+     *   $res = Yii::$app->helpers->api($method, $params);
+     */
+    public function api(string $method, $params = array())
+    {
+        $url = 'https://api.vk.com/method/' . $method . '?' . http_build_query($params);
+        $response = file_get_contents($url);
+        return json_decode($response, true);
     }
 }

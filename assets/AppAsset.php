@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\assets;
 
 use yii\web\AssetBundle;
@@ -14,6 +13,7 @@ class AppAsset extends AssetBundle
         'css/style.css',
         'css/normalize.css',
         'css/landing.css',
+        'css/modal.css',
     ];
     public $js = [
     ];

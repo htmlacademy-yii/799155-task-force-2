@@ -1,10 +1,26 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $user данные пользователя*/
+/* @var $user User данные пользователя*/
+/* @var $profile  Profile профиль пользователя*/
+/* @var $review Review отзыв о выполненной работе пользователя */
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+
+//авторизованный пользователь
+$authUser = Yii::$app->helpers->checkAuthorization();
+
+$showContacts = true;
+
+if ($profile->customer_only) {
+    if ($authUser->contractor) {
+        $showContacts = false;
+    } else {
+        $showContacts = in_array($authUser->id, $user->customers);
+    }
+}
+$age = Yii::$app->helpers->getAge($user->born_date);
 
 ?>
 <div class="left-column">
@@ -32,7 +48,8 @@ use yii\helpers\Url;
             <ul class="special-list">
                 <?php foreach ($user->categories as $category) :?>
                     <li class="special-item">
-                        <a href=<?='/category/' . $category->id?> class="link link--regular"><?=$category->name?></a>
+                        <a href=<?='/category/' . $category->id?>
+                            class="link link--regular"><?=$category->name?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -41,8 +58,11 @@ use yii\helpers\Url;
             <p class="head-info">Био</p>
             <p class="bio-info">
                 <span class="country-info">Россия</span>,
-                <span class="town-info"><?=$user->city?></span>,
-                <span class="age-info"><?=Yii::$app->helpers->getAge($user->born_date)?></span> лет
+                <span class="town-info"><?=$user->city?></span>
+                <?php if ($user->born_date !== null) :?>
+                <span class="age-info"><?=', ' . $age .
+                    Yii::$app->helpers->getNounPluralForm($age, ' год', ' года', ' лет')?></span>
+                <?php endif;?>
             </p>
         </div>
     </div>
@@ -88,6 +108,7 @@ use yii\helpers\Url;
                 <dd><?=$user->status?></dd>
         </dl>
     </div>
+    <?php if ($showContacts) :?>
     <div class="right-card white">
         <h4 class="head-card">Контакты</h4>
         <ul class="enumeration-list">
@@ -106,4 +127,5 @@ use yii\helpers\Url;
             <?php endif; ?>
         </ul>
     </div>
+    <?php endif;?>
 </div>

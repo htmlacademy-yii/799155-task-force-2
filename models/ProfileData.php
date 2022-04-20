@@ -4,6 +4,9 @@ namespace app\models;
 
 use Yii;
 
+/**
+ * Класс для работы с профилем пользовтеля
+ */
 class ProfileData extends Profile
 {
     public $name;
@@ -17,15 +20,30 @@ class ProfileData extends Profile
     public function __construct($prof, $user)
     {
         $this->name = $user->name;
-        $this->phone = $prof->phone;
-        $this->address = $prof->address;
+        if (!empty($prof->phone)) {
+            $this->phone = $prof->phone;
+        }
+        if (!empty($prof->address)) {
+            $this->address = $prof->address;
+        }
         $this->email = $user->email;
-        $this->avatar = $prof->avatar;
-        $this->born_date = $prof->born_date;
-        $this->messenger = $prof->messenger;
-        $this->about_info = $prof->about_info;
+        if (!empty($prof->avatar)) {
+            $this->avatar = $prof->avatar;
+        }
+        if (!empty($prof->born_date)) {
+            $this->born_date = $prof->born_date;
+        }
+        if (!empty($prof->messenger)) {
+            $this->messenger = $prof->messenger;
+        }
+        if (!empty($prof->about_info)) {
+            $this->about_info = $prof->about_info;
+        }
         $this->contractor = $user->contractor;
-        $this->town = $prof->city;
+        if (!empty($prof->city)) {
+            $this->town = $prof->city;
+        }
+        $this->customer_only = 1;
     }
 
     public function rules()
@@ -36,9 +54,17 @@ class ProfileData extends Profile
             [['address'], 'string', 'max' => 256],
             [['phone', 'messenger', 'social_net'], 'string', 'max' => 32],
             [['name', 'email', 'messenger'], 'required', 'message' => 'Поле не может быть пустым'],
+            ['customer_only', 'integer'],
+            ['customer_only', 'safe'],
         ];
     }
 
+    /**
+     * Запись данных профиля в базу
+     * @param Profile $prof профиль пользователя
+     * @param User $user зарегистрированный пользователь
+     * @return bool true, если запись прошла успешно
+     */
     public function updateProfile($prof, $user): bool
     {
         $prof->phone = $this->phone;
@@ -47,9 +73,12 @@ class ProfileData extends Profile
         $prof->messenger = $this->messenger;
         $prof->about_info = $this->about_info;
         $prof->city = $this->town;
+        $prof->customer_only = $this->customer_only;
         $prof->last_act = date("Y-m-d H:i:s");
         if ($prof->update() === false) {
-            throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($prof));
+            $message = 'Не удалось сохранить профиль. Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($prof);
+            Yii::$app->getSession()->setFlash('error', $message);
         }
         $city = City::findOne(['name' => $this->town]);
         if (!$city) {
@@ -61,14 +90,18 @@ class ProfileData extends Profile
             $city = new City();
             $city->attributes = $props;
             if ($city->save() === false) {
-                throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($city));
+                $message = 'Не удалось сохранить город. Ошибка: ';
+                $message .= Yii::$app->helpers->getFirstErrorString($city);
+                Yii::$app->getSession()->setFlash('error', $message);
             }
         }
         $user->city_id = $city->id;
         $user->email = $this->email;
         $user->name = $this->name;
         if ($user->update() === false) {
-            throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($user));
+            $message = 'Не удалось сохранить пользователя. Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($user);
+            Yii::$app->getSession()->setFlash('error', $message);
         }
         return true;
     }

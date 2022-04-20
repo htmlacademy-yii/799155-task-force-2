@@ -14,20 +14,23 @@ class Categories extends Model
 {
     public const MAIN_CATEGORIES = 'main_categories';
     public const ADD_CONDITION = 'add_condition';
+    public const MORE_CONDITION = 'more_condition';
     public const PERIODS = 'periods';
     public const CATEGORIES_NOT_SELECTED = '999';
     public const NO_ADDITION_SELECTED = '888';
 
     protected $categoriesCheckArray = self::CATEGORIES_NOT_SELECTED;
     protected $additionCategoryCheck = self::NO_ADDITION_SELECTED;
+    protected $moreConditionCheck = self::NO_ADDITION_SELECTED;
     protected $period = '';
 
     public function attributeLabels()
     {
         return [
             'categoriesCheckArray' => 'Категории',
-            'additionCategoryCheck' => 'Дополнительно',
+            'additionCategoryCheck' => 'Без откликов исполнителей',
             'period' => 'Период',
+            'moreConditionCheck' => 'Удаленная работа',
         ];
     }
 
@@ -37,6 +40,7 @@ class Categories extends Model
             ['categoriesCheckArray', 'safe'],
             ['additionCategoryCheck', 'safe'],
             ['period', 'safe'],
+            ['moreConditionCheck', 'safe'],
         ];
     }
 
@@ -69,4 +73,15 @@ class Categories extends Model
     {
         $this->period = $period;
     }
+
+    public function getMoreConditionCheck()
+    {
+        return $this->moreConditionCheck;
+    }
+
+    public function setMoreConditionCheck($check)
+    {
+        $this->moreConditionCheck = $check;
+    }
+
 }

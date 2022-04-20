@@ -7,6 +7,7 @@ use Yii;
 class Logon extends User
 {
     protected $user;
+    protected $source = false;
 
     public function rules()
     {
@@ -29,10 +30,19 @@ class Logon extends User
         }
     }
 
-    public function logon($user): bool
+    /**
+     * Производит авторизацию пользователя
+     * @param User $user данные пользователя
+     * @param bool $source источник данных для авторизации 
+     * true - авторизация через ВКонтакте, false - через форму на сайте
+     * 
+     * @return bool результат авторизации
+     */
+    public function logon($user, $source = false): bool
     {
         $this->user = $user;
-        if ($this->validate()) {
+        $this->source = $source;
+        if ($this->source or $this->validate()) {
             Yii::$app->user->login($user);
             return true;
         }

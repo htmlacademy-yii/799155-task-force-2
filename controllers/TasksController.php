@@ -29,7 +29,8 @@ class TasksController extends SecuredController
         $pages->pageSize = TasksSelector::TASKS_PER_PAGE;
         $tasks = TasksSelector::selectTasks($categories, $statuses, $pages, $userId);
         $categoryNames[Categories::MAIN_CATEGORIES] = Category::getCategoryNames();
-        $categoryNames[Categories::ADD_CONDITION] = 'Без исполнителя';
+        $categoryNames[Categories::ADD_CONDITION] = 'Без откликов исполнителей';
+        $categoryNames[Categories::MORE_CONDITION] = 'Удаленная работа';
         $categoryNames[Categories::PERIODS] = array_map(
             function ($key, $value) {
                 return $key . ' ' . $value;
@@ -62,7 +63,7 @@ class TasksController extends SecuredController
         if (Action::doAction(Action::ACTION_START, $task, $this->user->id)) {
             $task->contr_id = $model->contr_id;
             if ($task->update() === false) {
-                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+                throw new \RuntimeException('Не удалось изменить данные задачи id ' . $task->id);
             }
         }
     }
@@ -131,8 +132,8 @@ class TasksController extends SecuredController
         $doc = Document::findOne($docId);
         if ($doc) {
             return Yii::$app->response->sendFile(
-                Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $doc->fname, 
-                $doc->doc, 
+                Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $doc->fname,
+                $doc->doc,
                 [ 'inline' => false,]
             );
         }
@@ -243,7 +244,7 @@ class TasksController extends SecuredController
 
         if (Action::doAction(Action::ACTION_CANCEL, $task, $custom->id)) {
             if ($task->update() === false) {
-                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+                throw new \RuntimeException('Не удалось изменить данные задачи id ' . $task->id);
             }
         }
         return $this->redirect(['/task/' . $id]);
@@ -264,7 +265,7 @@ class TasksController extends SecuredController
         $task->budget = $reply->price;
         if (Action::doAction(Action::ACTION_COMPLETE, $task, $custom->id)) {
             if ($task->update() === false) {
-                throw new \Exception('Не удалось изменить данные задачи id ' . $task->id);
+                throw new \RuntimeException('Не удалось изменить данные задачи id ' . $task->id);
             }
         }
         return $this->refresh();

@@ -11,10 +11,23 @@ use app\models\User;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use app\models\Profile;
-use TaskForce\exception\TaskForceException;
+use app\models\Source;
+use app\models\Location;
+use yii\web\ForbiddenHttpException;
+use TaskForce\logic\Client;
 
 class AuthController extends Controller
 {
+    public function actions()
+    {
+        return [
+            'vkontakte' => [
+                'class' => 'yii\authclient\AuthAction',
+                'successCallback' => [$this, 'actionVkontakte'],
+            ],
+        ];
+    }
+
     public function behaviors()
     {
         return [
@@ -35,7 +48,7 @@ class AuthController extends Controller
                         'actions' => ['logout'],
                         'matchCallback' => function ($rule, $action) {
                             if (Yii::$app->helpers->checkAuthorization() === null) {
-                                throw new TaskForceException('Вы не авторизованы!');
+                                throw new ForbiddenHttpException('Вы не авторизованы!');
                             }
                             return true;
                         },
@@ -53,13 +66,11 @@ class AuthController extends Controller
     public function actionRegistration()
     {
         $model = new Registration();
-        $cities = array_values(City::getCityNames());
-        if (Registration::registerUser($model, $cities)) {
+        if (Registration::registerUser($model)) {
             $this->goHome();
         }
         return $this->render('registration', [
             'model' => $model,
-            'cities' => $cities,
         ]);
     }
 
@@ -92,5 +103,17 @@ class AuthController extends Controller
             Yii::$app->user->logout();
         }
         return $this->goHome();
+    }
+
+    /**
+     * Регистрация через аккаунт ВКонтакте
+     * @param Object $client - объект, передаваемый API VKontakte
+     */
+    public function actionVkontakte($client)
+    {
+        if ($client) {
+            $model = new Client($client);
+            $model->authorizeClient();
+        }
     }
 }

@@ -6,6 +6,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use app\assets\AppAsset;
+use yii\widgets\ActiveForm;
 
 AppAsset::register($this);
 
@@ -14,6 +15,15 @@ $userIsAuthorized = true;
 $user = Yii::$app->helpers->checkAuthorization();
 if ($user === null) {
     $userIsAuthorized = false;
+}
+//признак вывода модального окна для
+//загрузки аватара из ВКонтакте
+//true, если была выполнена регистрация пользователя
+//по аккаунту ВКонтакте
+$registration = false;
+if (isset(Yii::$app->getSession()['registration'])) {
+    $registration = Yii::$app->getSession()['registration'];
+    unset(Yii::$app->getSession()['registration']);
 }
 
 ?>
@@ -144,6 +154,36 @@ if ($user === null) {
             </div>
         </div>
     </header>
+    <div class="overlay" id="overlay"></div>
+    <input type="hidden" id="show" value="<?=$registration ? '1' : '0';?>" />
+    <div class="modal" id="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientLabel">Загрузка аватара из ВКонтакте</h5>
+            </div>
+            <form id="modal_form" method="post" action="site/index">
+                <div class="modal-body">
+                    <div>
+                    <input type="checkbox" id="modal_click" name="modal_zakaz"
+                            class="checkbox__legend" checked>
+                    <label for="modal_click">Я собираюсь откликаться на заказы</label>
+                    </div>
+                    <div>
+                    <input type="checkbox" id="modal_check" name="modal_photo"
+                            class="checkbox__legend" checked>
+                    <label for="modal_check">Загрузить аватар</label>
+                    </div>
+                    <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" 
+                                    value="<?= Yii::$app->request->getCsrfToken()?>" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="modal_submit" class="btn btn-primary">Выполнить</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
     <main>
         <div class="landing-container">
            <div class="landing-top">
@@ -152,7 +192,8 @@ if ($user === null) {
                <p>Сломался кран на кухне? Надо отправить документы? Нет времени самому гулять с собакой?
                    У нас вы быстро найдёте исполнителя для любой жизненной ситуации?<br>
                    Быстро, безопасно и с гарантией. Просто, как раз, два, три. </p>
-               <?=$userIsAuthorized ? '' : Html::a('Создать аккаунт', ['/registration',], ['class' => 'button']);?>
+               <?=$userIsAuthorized ? '' :
+                    Html::a('Создать аккаунт', ['/registration',], ['class' => 'button']);?>
            </div>
            <div class="landing-center">
                <div class="landing-instruction">
@@ -241,7 +282,8 @@ if ($user === null) {
                    <div class="landing-task">
                        <div class="landing-task-top task-<?=$task->code?>"></div>
                        <div class="landing-task-description">
-                           <h3><a href=<?='/task/' . $task->id?> class="link-regular"><?=$task->name?></a></h3>
+                           <h3><a href=<?='/task/' . $task->id?>
+                                class="link-regular"><?=$task->name?></a></h3>
                            <p><?=substr($task->description, 0, 60) . ' ...'?></p>
                        </div>
                        <div class="landing-task-info">
@@ -315,8 +357,26 @@ if ($user === null) {
         </div>
     </footer>
 </div>
-<div class="overlay"></div>
 <?php $this->endBody() ?>
 </body>
 </html>
 <?php $this->endPage() ?>
+
+<?php
+$js = <<<JS
+    var modal = $('#modal');
+    var submit = $('#modal_submit');
+    var overlay = $('#overlay'),
+        show = $('#show');
+    if (show.val() == 1) {
+        overlay.fadeIn();
+        modal.fadeIn(500);
+    }
+    submit.click(function(evt) {
+        modal.fadeOut(1000);
+        overlay.fadeOut();
+        show.val(0);
+    });
+JS;
+$this->registerJs($js);
+?>

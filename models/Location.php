@@ -118,7 +118,7 @@ class Location extends ActiveRecord
                 throw new BadResponseException("API error: " . $error, $request, $response);
             }
         } catch (RequestException $e) {
-            //throw new \Exception($e->getMessage());
+            Yii::$app->getSession()->setFlash('error', $e->getMessage());
             return null;
         }
         $featureMember = $responseData['response']['GeoObjectCollection']['featureMember'];
@@ -160,7 +160,9 @@ class Location extends ActiveRecord
             $city = new City();
             $city->attributes = $props;
             if ($city->save() === false) {
-                throw new \RuntimeException(Yii::$app->helpers->getFirstErrorString($city));
+                $message = 'Не удалось сохранить город. Ошибка: ';
+                $message .= Yii::$app->helpers->getFirstErrorString($city);
+                Yii::$app->getSession()->setFlash('error', $message);
             }
         }
         $loc = new Location();

@@ -1,8 +1,8 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $model регистрационная информация */
-/* @var $categories перечень категорий*/
+/* @var $model TasksSelector информация о задании*/
+/* @var $categories string array перечень категорий*/
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
 <script type="text/javascript">
     ymaps.ready(init);
     function init() {
-            // Подключаем поисковые подсказки к полю ввода.
+            // Подключаем поисковые подсказки Yandex Map к полю ввода.
             var suggestView = new ymaps.SuggestView('tasksselector-address');
         };
 </script>
@@ -44,7 +44,7 @@ use yii\widgets\ActiveForm;
                         'class' => 'control-label',
                     ],
                 ]
-            )->input('text')->hint('Опишите суть работы')->label('Название');?>
+            )->input('text')->hint('Опишите суть работы')->label('Мне нужно');?>
         </div>
         <div class="form-group">
             <?php echo $form->field(

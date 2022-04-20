@@ -12,7 +12,7 @@ namespace app\models;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\data\Pagination;
-use TaskForce\exception\TaskForceException;
+use yii\db\Query;
 
 class TasksSelector extends Task
 {
@@ -27,6 +27,8 @@ class TasksSelector extends Task
     public $code;
     public $timeout = false; //true, если задание выполняется и просрочено
     public $address;
+    public $count;
+    public $location;
 
     public const TASKS_PER_PAGE = 5;
 
@@ -105,6 +107,8 @@ class TasksSelector extends Task
             'address' => 'Адрес задания',
             'city' => 'Город',
             'street' => 'Улица',
+            'count' => 'Задания без откликов',
+            'loc_id' => 'ID локации задания',
         ];
     }
 
@@ -171,6 +175,7 @@ class TasksSelector extends Task
     ): array {
         $selectedCategoriesId = $categories->categoriesCheckArray;
         $additionalCondition = $categories->additionCategoryCheck;
+        $remoteTaskCondition = $categories->moreConditionCheck;
         $period = '';
         $request = Yii::$app->request;
         if ($request->isPost) {
@@ -181,47 +186,72 @@ class TasksSelector extends Task
             if ($categories->additionCategoryCheck !== Categories::NO_ADDITION_SELECTED) {
                 $additionalCondition = $categories->additionCategoryCheck;
             }
+            if ($categories->moreConditionCheck !== Categories::NO_ADDITION_SELECTED) {
+                $remoteTaskCondition = $categories->moreConditionCheck;
+            }
             if ($categories->period != null) {
                 $period = $categories->period;
             }
         }
-        $query = self::find()->select(['id']);
-        if ($userId > 0) {
-            $query = $query->where(['or' , ['custom_id' => $userId], ['contr_id' => $userId]]);
+        $query = null;
+        if ($remoteTaskCondition !== Categories::NO_ADDITION_SELECTED) {
+            $query = (new Query())->select(
+                [
+                    'tasks.id',
+                    'cat_id',
+                    'tasks.custom_id',
+                    'tasks.contr_id',
+                    'tasks.add_date',
+                    'tasks.status',
+                    'city_id'
+                ])->from('tasks')->
+                leftJoin('locations l', 'tasks.id = l.task_id')->where(['city_id' => null]);
         }
-        if ($selectedCategoriesId === Categories::CATEGORIES_NOT_SELECTED) {
-            if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                $query = $query->where(['in' , 'tasks.status', $statuses]);
+        if ($additionalCondition !== Categories::NO_ADDITION_SELECTED) {
+            if ($query === null) {
+                $query = (new Query())->select(['tasks.id', 'reviews'])->from('tasks')->
+                    leftJoin('replies r', 'tasks.id = r.task_id')->where(['reviews' => null]);
             } else {
-                $query = $query->where(['in' , 'tasks.status', $statuses]);
-                $query = $query->andWhere(['contr_id' => 0]);
+                $query = $query->select(['reviews'])->
+                    leftJoin('replies r', 'tasks.id = r.task_id')->where(['reviews' => null]);
             }
-        } else {
-            if ($additionalCondition === Categories::NO_ADDITION_SELECTED) {
-                $query = $query->where(['in' , 'tasks.status', $statuses]);
-                $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
-            } else {
-                foreach ($selectedCategoriesId as $catId) {
-                    $query = $query->where(['in' , 'tasks.status', $statuses]);
-                    $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
-                    $query = $query->andWhere(['contr_id' => 0]);
-                }
-            }
+        }
+        if ($query === null) {
+            $query = (new Query())->select(
+                [
+                    'id',
+                    'cat_id',
+                    'custom_id',
+                    'contr_id',
+                    'add_date',
+                    'status',
+                ])->from('tasks');
+        }
+        if ($userId > 0) {
+            $query = $query->andWhere(['or' , ['tasks.custom_id' => $userId], ['tasks.contr_id' => $userId]]);
+        }
+        $query = $query->andWhere(['in' , 'tasks.status', $statuses]);
+        if ($selectedCategoriesId !== Categories::CATEGORIES_NOT_SELECTED) {
+            $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
         };
         if (strlen($period) > 0) {
             $hours = array_keys(self::TIME_PERIODS);
             $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
-            $query = $query->andWhere(['>', 'add_date', "$date"]);
+            $query = $query->andWhere(['>', 'tasks.add_date', "$date"]);
         }
+        $query = $query->orderBy(['tasks.add_date' => SORT_DESC]);
         $countQuery = clone $query;
-        $pages->totalCount = $countQuery->count();
+        $pages->totalCount = count($countQuery->all());
         $pages->forcePageParam = false;
         $pages->pageSizeParam = false;
-        $query = $query->limit($pages->limit)->offset($pages->offset)->orderBy(['add_date' => SORT_DESC]);
+        $query = $query->limit($pages->limit)->offset($pages->offset)->
+                orderBy(['tasks.add_date' => SORT_DESC]);
         $taskIds = $query->all();
         $tasks = [];
         foreach ($taskIds as $taskId) {
-            $tasks[] = self::selectTask($taskId->id);
+            if (isset($taskId['id'])) {
+                $tasks[] = self::selectTask($taskId['id']);
+            }
         }
         return $tasks;
     }
@@ -249,6 +279,7 @@ class TasksSelector extends Task
             'budget',
             'tasks.add_date',
             'categories.name as category',
+            'custom_id'
         ];
         $query = self::find()->select(['tasks.id']);
         $query->where(['or' , ['custom_id' => $userId], ['contr_id' => $userId]]);
@@ -319,7 +350,8 @@ class TasksSelector extends Task
         }
         $task = $query->one();
         if ($task === null) {
-            throw new TaskForceException('Задание id = ' . $taskId . ' не найдено!');
+            $message = 'Задание id = ' . $taskId . ' не найдено!';
+            Yii::$app->getSession()->setFlash('error', $message);
         }
         return $task;
     }
