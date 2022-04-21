@@ -68,7 +68,7 @@ class UsersSelector extends User
         $user->status = count($tasks) ? self::STATUS_BUSY : self::STATUS_FREE;
         if (count($tasks)) {
             $user->customers = ArrayHelper::getColumn($tasks, 'custom_id');
-        } 
+        }
         $result = ReviewsSelector::getRating($userId);
         $user->stars = [];
         $user->stars = array_pad($user->stars, round($result[1]), true);

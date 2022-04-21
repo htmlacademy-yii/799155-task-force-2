@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\web\UploadedFile;
 use yii\base\Model;
+
 /**
  * Класс для загрузки изображения аватара с локального
  * компьбтера в базу

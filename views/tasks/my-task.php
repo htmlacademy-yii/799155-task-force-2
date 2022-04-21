@@ -59,9 +59,9 @@ $link = substr(Url::current(), 0, strpos(Url::current(), '&', -1) - 1);
             <li class="pagination-item mark">
             <?php if ($pages->getPage() < $pages->getPageCount() - 1) :?>
                     <a href=<?=$link . ($pages->getPage() + 2);?> class="link link--page"></a>
-                <?php else :?>
+            <?php else :?>
                     <a href=<?=$link . ($pages->getPage() + 1)?> class="link link--page"></a>
-                <?php endif; ?>
+            <?php endif; ?>
             </li>
         </ul>
     </div>

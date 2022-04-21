@@ -32,7 +32,7 @@ class Registration extends User
             [['longitude', 'latitude', 'gorod'], 'safe'],
         ];
     }
-    
+
     /**
      * Регистрация подьзователя
      * @param Registration $model данные формы регистрации

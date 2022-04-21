@@ -6,7 +6,7 @@ use yii\data\Pagination;
 
 class ReviewsSelector extends Review
 {
-    const ALL_TASKS = 1000;
+    public const ALL_TASKS = 1000;
 
     public $avatar; //аватар заказчика-автора отзыва
     public $name; //наименование задачи

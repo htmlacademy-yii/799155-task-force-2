@@ -83,5 +83,4 @@ class Categories extends Model
     {
         $this->moreConditionCheck = $check;
     }
-
 }
