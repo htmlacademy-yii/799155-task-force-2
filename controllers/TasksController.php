@@ -174,7 +174,9 @@ class TasksController extends SecuredController
         }
         if ($action->id === 'add-task') {
             if ($this->user->contractor === 1) {
-                throw new ForbiddenHttpException('Создание заданий разрешено только заказчикам!');
+                //Создание заданий разрешено только заказчикам
+                $this->goBack();
+                return false;
             }
         }
         return true;
