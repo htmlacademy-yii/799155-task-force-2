@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\components\CategoriesValidator;
 
 /**
  * Класс для работы с профилем пользовтеля
@@ -56,6 +57,8 @@ class ProfileData extends Profile
             [['name', 'email', 'messenger'], 'required', 'message' => 'Поле не может быть пустым'],
             ['customer_only', 'integer'],
             ['customer_only', 'safe'],
+            [['longitude', 'latitude'], 'safe'],
+            ['categoriesCheckArray', CategoriesValidator::class],
         ];
     }
 
@@ -75,33 +78,40 @@ class ProfileData extends Profile
         $prof->city = $this->town;
         $prof->customer_only = $this->customer_only;
         $prof->last_act = date("Y-m-d H:i:s");
+        $cityId = 0;
         if ($prof->update() === false) {
             $message = 'Не удалось сохранить профиль. Ошибка: ';
             $message .= Yii::$app->helpers->getFirstErrorString($prof);
             Yii::$app->getSession()->setFlash('error', $message);
+            return false;
         }
-        $city = City::findOne(['name' => $this->town]);
-        if (!$city) {
-            $props = [
-                'name' => $this->town,
-                'longitude' => $this->longitude,
-                'latitude' => $this->latitude,
-            ];
-            $city = new City();
-            $city->attributes = $props;
-            if ($city->save() === false) {
-                $message = 'Не удалось сохранить город. Ошибка: ';
-                $message .= Yii::$app->helpers->getFirstErrorString($city);
-                Yii::$app->getSession()->setFlash('error', $message);
+        if ($this->town !== null) {
+            $city = City::findOne(['name' => $this->town]);
+            if (!$city) {
+                $props = [
+                    'name' => $this->town,
+                    'longitude' => $this->longitude,
+                    'latitude' => $this->latitude,
+                ];
+                $city = new City();
+                $city->attributes = $props;
+                if ($city->save() === false) {
+                    $message = 'Не удалось сохранить город. Ошибка: ';
+                    $message .= Yii::$app->helpers->getFirstErrorString($city);
+                    Yii::$app->getSession()->setFlash('error', $message);
+                    $city->id = 0;
+                }
             }
+            $cityId = $city->id;
         }
-        $user->city_id = $city->id;
+        $user->city_id = $cityId;
         $user->email = $this->email;
         $user->name = $this->name;
         if ($user->update() === false) {
             $message = 'Не удалось сохранить пользователя. Ошибка: ';
             $message .= Yii::$app->helpers->getFirstErrorString($user);
             Yii::$app->getSession()->setFlash('error', $message);
+            return false;
         }
         return true;
     }
