@@ -85,7 +85,7 @@ class Document extends ActiveRecord
             }
             move_uploaded_file(
                 $file->tempName,
-                Yii::$app->basePath . Yii::$app->params['uploadPath'] . $newName
+                Yii::$app->basePath . '/web' . Yii::$app->params['uploadPath'] . $newName
             );
         }
         return true;

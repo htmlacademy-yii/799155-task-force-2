@@ -65,8 +65,10 @@ class Action
      */
     public static function doAction(string $action, Task $task, int $userId): bool
     {
-        if (($action === self::ACTION_REFUSE and $userId === $task->contr_id) or
-                $userId === $task->custom_id) {
+        if (
+            ($action === self::ACTION_REFUSE and $userId === $task->contr_id) or
+            $userId === $task->custom_id
+        ) {
             $actions = self::mapStatusToAllowedActions($task->status);
             if (count($actions) === 0) {
                 return false;

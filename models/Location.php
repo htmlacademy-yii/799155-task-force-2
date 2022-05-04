@@ -83,7 +83,7 @@ class Location extends ActiveRecord
         string $name,
         string $type = Location::TYPE_CITY,
         string $more = null
-        ): ?array {
+    ): ?array {
         $city = City::findOne(['name' => $name]);
         if ($city) {
             return [
@@ -141,7 +141,7 @@ class Location extends ActiveRecord
     /**
      * Сохраняет данные локации задания
      * @param TasksSelector $model задание
-     * 
+     *
      * @return bool результат сохранения данных в базе
     */
     public static function saveLocation(TasksSelector $model): bool
@@ -181,7 +181,7 @@ class Location extends ActiveRecord
     /**
      * Возвращает координаты локации
      * @param int $taskId id задания
-     * 
+     *
      * @return array долгота и широта локации
      */
     public static function getGeoLocation(int $taskId): ?array

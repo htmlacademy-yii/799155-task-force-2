@@ -47,7 +47,7 @@ class UsersController extends SecuredController
         $profile = new ProfileData($prof, $user);
         $avatar = new ProfileFile();
         $profile->categoriesCheckArray = ProfileData::decodeCategories($prof->categories);
-
+        $result = 0;
         if (Yii::$app->request->isPost) {
             if (Yii::$app->request->post('modal') === 'file') {
                 $avatar->file = UploadedFile::getInstance($avatar, 'file');
@@ -59,9 +59,9 @@ class UsersController extends SecuredController
             }
             if (Yii::$app->request->post('form') === 'save') {
                 $profile->load(Yii::$app->request->post());
-                $prof->categories = ProfileData::codeCategories($profile->categoriesCheckArray);
                 if ($profile->validate()) {
-                    $profile->updateProfile($prof, $user);
+                    $prof->categories = ProfileData::codeCategories($profile->categoriesCheckArray);
+                    $result = $profile->updateProfile($prof, $user) ? 1 : 0;
                 }
             }
         }
@@ -69,6 +69,7 @@ class UsersController extends SecuredController
             'model' => $profile,
             'avatar' => $avatar,
             'catNames' => $categoryNames,
+            'result' => $result,
         ]);
     }
 

@@ -4,6 +4,7 @@
 /* @var $model ProfileData */
 /* @var $catName array of category names*/
 /* @var $avatar ProfileFile */
+/* @var $result int управляет показом результата операции*/
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -105,6 +106,19 @@ $user = Yii::$app->helpers->checkAuthorization();
     );?>
     </div>
 </div>
+<!-- Modal -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" tabindex="-1" id="modal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="label">Профиль изменён</h3>
+                <div><input type="hidden" id="result" value="<?=$result?>"></input></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal -->
 <div class="regular-form my-profile-form">
     <?php $form = ActiveForm::begin(['id' => 'my-profile-form',]);?>
         <div>
@@ -286,7 +300,9 @@ $user = Yii::$app->helpers->checkAuthorization();
 <?php
 $js = <<<JS
 var address = $('#profiledata-address'),
-    city = $('#profiledata-town');
+    city = $('#profiledata-town'),
+    longitude = $('#profiledata-longitude'),
+    latitude = $('#profiledata-latitude');
     address.on('change', function() {
     setTimeout(function() {
         // Забираем запрос из поля ввода.
@@ -305,13 +321,26 @@ var address = $('#profiledata-address'),
                         bounds, 
                         [300, 200]
                     );
-                    latitude.val(mapState.center[0]);
-                    longitude.val(mapState.center[1]);
+                latitude.val(mapState.center[0]);
+                longitude.val(mapState.center[1]);
             },
             function (e) {
             console.log(e)
         });
     }, 400);
+});
+$(document).ready(function(){
+    var modal = $('#modal');
+    var overlay = $('#overlay');
+    if ($('#result').val() === '1') {
+        overlay.fadeIn();
+        modal.fadeIn(500);
+        setTimeout(function () {
+            modal.fadeOut(3000);
+            overlay.fadeOut();
+            $('#result').val(0);
+        }, 3000);
+    }
 });
 JS;
 $this->registerJs($js);

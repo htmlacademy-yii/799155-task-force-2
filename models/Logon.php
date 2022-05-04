@@ -33,9 +33,9 @@ class Logon extends User
     /**
      * Производит авторизацию пользователя
      * @param User $user данные пользователя
-     * @param bool $source источник данных для авторизации 
+     * @param bool $source источник данных для авторизации
      * true - авторизация через ВКонтакте, false - через форму на сайте
-     * 
+     *
      * @return bool результат авторизации
      */
     public function logon($user, $source = false): bool

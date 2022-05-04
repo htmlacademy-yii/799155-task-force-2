@@ -15,6 +15,7 @@ use app\models\Source;
 use app\models\Logon;
 use app\models\Location;
 use app\models\ProfileFile;
+
 /**
  * Класс служит для регистрации пользователя
  * через аккаунт ВКонтакте
@@ -90,8 +91,10 @@ class Client
                 $model = new Logon();
                 $model->logon($user, true);
             } else { //регистрация
-                if (!empty($this->email) &&
-                    User::find()->where(['email' => $this->email])->exists()) {
+                if (
+                    !empty($this->email) &&
+                    User::find()->where(['email' => $this->email])->exists()
+                ) {
                         $message = 'Пользователь с такой электронной почтой как в ' . $this->source;
                         $message .= ' уже существует';
                         Yii::$app->getSession()->setFlash('info', $message);

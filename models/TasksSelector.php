@@ -204,8 +204,9 @@ class TasksSelector extends Task
                     'tasks.add_date',
                     'tasks.status',
                     'city_id'
-                ])->from('tasks')->
-                leftJoin('locations l', 'tasks.id = l.task_id')->where(['city_id' => null]);
+                ]
+            )->from('tasks')->
+            leftJoin('locations l', 'tasks.id = l.task_id')->where(['city_id' => null]);
         }
         if ($additionalCondition !== Categories::NO_ADDITION_SELECTED) {
             if ($query === null) {
@@ -225,7 +226,8 @@ class TasksSelector extends Task
                     'contr_id',
                     'add_date',
                     'status',
-                ])->from('tasks');
+                ]
+            )->from('tasks');
         }
         if ($userId > 0) {
             $query = $query->andWhere(['or' , ['tasks.custom_id' => $userId], ['tasks.contr_id' => $userId]]);

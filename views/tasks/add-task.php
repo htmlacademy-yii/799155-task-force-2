@@ -33,7 +33,8 @@ use yii\widgets\ActiveForm;
             'options' => ['class' => 'add-task-form'],
             'action' => Url::to(['tasks/add-task']),
             'method' => 'post',
-        ]);?>
+        ]
+    );?>
         <h3 class="head-main head-main">Публикация нового задания</h3>
         <div class="form-group">
             <?php echo $form->field(

@@ -14,8 +14,8 @@ use TaskForce\logic\Client;
 
 class PasswordValidator extends Validator
 {
-    const TEST_WEAK = 0;
-    const TEST_STRONG = 1;
+    public const TEST_WEAK = 0;
+    public const TEST_STRONG = 1;
 
     public $strength;
 
@@ -49,7 +49,7 @@ class PasswordValidator extends Validator
     /**
      * Проверка пароля на стороне клиента
      * @param Password $model объект класса
-     * 
+     *
      * @return string js-сообщение об ошибке или ничего
      */
     public function clientValidateAttribute($model, $attribute, $view)
@@ -70,10 +70,11 @@ class PasswordValidator extends Validator
 
     /**
      * Проверка силы пароля на стороне сервера
-     * @param CModel $model модель валидации
+     *
      * @param string $attribute атрибут, который валидируется в данный момент
      */
-    protected function validatePower($attribute, $params){
+    protected function validatePower($attribute, $params)
+    {
         // проверяем параметр strength и выбираем паттерн для preg_match
         if ($this->strength === self::TEST_WEAK) {
             $pattern = $this->weak_pattern;

@@ -3,6 +3,7 @@
 /**
  * Класс для формы контакта
  */
+
 namespace app\models;
 
 use Yii;
@@ -49,4 +50,3 @@ class Contact extends Model
         return $this->sendOk;
     }
 }
-?>
