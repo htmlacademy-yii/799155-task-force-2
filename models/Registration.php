@@ -48,7 +48,7 @@ class Registration extends User
                     $model->contractor = '0';
             }
             $cityId = City::getId($model->gorod);
-            if ($cityId === null) {
+            if ($cityId === 0) {
                 $city = new City();
                 $city->name = $model->gorod;
                 $city->latitude = $model->latitude;

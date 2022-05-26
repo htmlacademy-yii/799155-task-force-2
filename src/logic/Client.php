@@ -74,85 +74,128 @@ class Client
     }
 
     /**
-     * Призводит авторизацию пользователя
+     * Обработка данных регистрации пользователя
+     */
+    private function updateSource()
+    {
+        $user = Yii::$app->helpers->checkAuthorization();
+        $auth = Source::getSource($user, $this);
+        if (!$auth->save()) {
+            $message = 'Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($auth);
+            Yii::$app->getSession()->setFlash('error', $message);
+        }
+    }
+    
+    /**
+     * Регистрация пользователя
+     * @param User $user сущность
+     * @return true|false результат регистрации
+     */
+    private function registerUser(&$user): bool
+    {
+        if (
+            !empty($this->email) &&
+            User::find()->where(['email' => $this->email])->exists()
+        ) {
+            $message = 'Пользователь с такой электронной почтой как в ' . $this->source;
+            $message .= ' уже существует';
+            Yii::$app->getSession()->setFlash('info', $message);
+            return false;
+        } 
+        $geoData = null;
+        if (!empty($this->city)) {
+            $geoData = Location::getGeoData($this->city);
+        }
+        $props = [
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => Yii::$app->security->generateRandomString(self::PASSWORD_LENGTH),
+            'contractor' => 0,
+            'city_id' => $geoData['id'],
+        ];
+        $user->attributes = $props;
+        if ($user->save()) {
+            if (!$this->createProfile($user)) {
+                //профиль не создан
+                //удаляем данные о пользователе
+                $user->delete();
+                return false;
+            }
+        } else {
+            $message = 'Не удалось зарегистрировать пользователя. Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($user);
+            Yii::$app->getSession()->setFlash('error', $message);
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Создает профиль пользователя
+     * @param User $user данные регистрации пользователя 
+     * @return true|false результат создания профиля
+     */
+    private function createProfile($user): bool
+    {
+        $profile = new Profile();
+        $profile->user_id = $user->id;
+        $profile->last_act = date("Y-m-d H:i:s");
+        if (!empty($this->city)) {
+            $profile->city = $this->city;
+        }
+        if (!empty($this->bdate)) {
+            $time = strtotime($this->bdate);
+            $profile->born_date = date('Y-m-d', $time);
+        }
+        $profile->avatar = ProfileFile::AVATAR_ANONIM;
+        /* Загрузка аватара будет выполнена в SiteController через Client::loadPhoto() */
+        if (!$profile->save()) {
+            $message = 'Не удалось сохранить профиль. Ошибка: ';
+            $message .= Yii::$app->helpers->getFirstErrorString($profile);
+            Yii::$app->getSession()->setFlash('error', $message);
+            return false;
+        }
+        return true;
+    }
+    
+     
+    /**
+     * Производит авторизацию пользователя
      * через аккаунт ВКонтакте
      */
     public function authorizeClient()
     {
+        if (!Yii::$app->user->isGuest) {
+            //пользователь уже зарегистрирован и авторизован
+            $this->updateSource();
+            return;
+        }
         $auth = Source::find()->where(
             [
                 'source' => $this->source,
                 'source_id' => $this->sourceId,
             ]
         )->one();
-        if (Yii::$app->user->isGuest) {
-            if ($auth) { //авторизация
-                $user = User::findOne($auth->user_id);
+        if ($auth) { //пользователь уже заходил через ВКонтакте, авторизация
+            $user = User::findOne($auth->user_id);
+            $model = new Logon();
+            $model->logon($user, true);
+            return;
+        } 
+        //пользователь не зарегистрирован
+        //регистрация пользователя
+        $user = new User();
+        if ($this->registerUser($user))
+        {
+            $auth = Source::getSource($user, $this);
+            if ($auth->save()) {
                 $model = new Logon();
                 $model->logon($user, true);
-            } else { //регистрация
-                if (
-                    !empty($this->email) &&
-                    User::find()->where(['email' => $this->email])->exists()
-                ) {
-                        $message = 'Пользователь с такой электронной почтой как в ' . $this->source;
-                        $message .= ' уже существует';
-                        Yii::$app->getSession()->setFlash('info', $message);
-                } else {
-                    $geoData = null;
-                    if (!empty($this->city)) {
-                        $geoData = Location::getGeoData($this->city);
-                    }
-                    $props = [
-                        'name' => $this->name,
-                        'email' => $this->email,
-                        'password' => Yii::$app->security->generateRandomString(self::PASSWORD_LENGTH),
-                        'contractor' => 0,
-                        'city_id' => $geoData['id'] ?? 0,
-                    ];
-                    $user = new User();
-                    $user->attributes = $props;
-                    if ($user->save()) {
-                        $profile = new Profile();
-                        $profile->user_id = $user->id;
-                        $profile->last_act = date("Y-m-d H:i:s");
-                        if (!empty($this->city)) {
-                            $profile->city = $this->city;
-                        }
-                        if (!empty($this->bdate)) {
-                            $time = strtotime($this->bdate);
-                            $profile->born_date = date('Y-m-d', $time);
-                        }
-                        $profile->avatar = ProfileFile::AVATAR_ANONIM;
-                        /* Загрузка аватара выполнена в SiteController через Client::loadPhoto() */
-                        if (!$profile->save()) {
-                            $message = 'Не удалось сохранить профиль. Ошибка: ';
-                            $message .= Yii::$app->helpers->getFirstErrorString($profile);
-                            Yii::$app->getSession()->setFlash('error', $message);
-                        }
-                        $auth = Source::getSource($user, $this);
-                        if ($auth->save()) {
-                            $model = new Logon();
-                            $model->logon($user, true);
-                            Yii::$app->getSession()['registration'] = true;
-                            Yii::$app->getSession()['token'] = $this->accessToken;
-                        } else {
-                            $message = 'Не удалось зарегистрировать пользователя. Ошибка: ';
-                            $message .= Yii::$app->helpers->getFirstErrorString($auth);
-                            Yii::$app->getSession()->setFlash('error', $message);
-                        }
-                    } else {
-                        $message = 'Не удалось зарегистрировать пользователя. Ошибка: ';
-                        $message .= Yii::$app->helpers->getFirstErrorString($user);
-                        Yii::$app->getSession()->setFlash('error', $message);
-                    }
-                }
-            }
-        } else { // Пользователь уже зарегистрирован
-            $user = Yii::$app->helpers->checkAuthorization();
-            $auth = Source::getSource($user, $this);
-            if (!$auth->save()) {
-                $message = 'Ошибка: ';
+                Yii::$app->getSession()['registration'] = true;
+                Yii::$app->getSession()['token'] = $this->accessToken;
+            } else {
+                $message = 'Не удалось сохранить данные регистрации. Ошибка: ';
                 $message .= Yii::$app->helpers->getFirstErrorString($auth);
                 Yii::$app->getSession()->setFlash('error', $message);
             }

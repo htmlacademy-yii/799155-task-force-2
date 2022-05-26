@@ -25,10 +25,6 @@ use GuzzleHttp\Psr7\Request;
 
 class Location extends ActiveRecord
 {
-    public const TYPE_CITY = 'city';
-    public const TYPE_DISTRICT = 'district';
-    public const TYPE_STREET = 'street';
-
     /**
      * {@inheritdoc}
      */
@@ -68,34 +64,17 @@ class Location extends ActiveRecord
     }
 
     /**
-     * Возвращает геоданные: долготу и широту локации
-     * Если ищем данные только для self::TYPE_CITY, то параметр name не важен.
-     * Если ищем данные по названию района или улицы, то следует
-     * задать имя города и соответствующее название
-     * @param string $name имя города
-     * @param string $type тип локации: self::TYPE_CITY или
-     * self::TYPE_DISTRICT или self::TYPE_STREET
-     * @param string $more null или имя локации в соответствии с типом
-     *
-     * @return array данные локации или null
+     * Возвращает результат запроса к API Yandex
+     * @param string $city наименование локации
+     * @return array данные локации
      */
-    public static function getGeoData(
-        string $name,
-        string $type = Location::TYPE_CITY,
-        string $more = null
-    ): ?array {
-        $city = City::findOne(['name' => $name]);
-        if ($city) {
-            return [
-                'id' => $city->id,
-                'lat' => $city->latitude,
-                'lon' => $city->longitude,
-            ];
-        }
+    public static function getApiRequest($city): array
+    {
         $apiKey = Yii::$app->params['mapApiKey'];
         $client = new Client([
             'base_uri' => 'https://geocode-maps.yandex.ru/1.x/',
         ]);
+        $responseData = [];
         try {
             $request = new Request('GET', '');
             $response = $client->send($request, [
@@ -119,23 +98,49 @@ class Location extends ActiveRecord
             }
         } catch (RequestException $e) {
             Yii::$app->getSession()->setFlash('error', $e->getMessage());
-            return null;
+            throw new BadResponseException("Request error: " . $e->getMessage());
         }
-        $featureMember = $responseData['response']['GeoObjectCollection']['featureMember'];
-        $pos = $featureMember[0]['GeoObject']['Point']['pos'];
-        $blank = strpos($pos, ' ');
-        $city = new City();
-        $city->name = $city;
-        $city->longitude = substr($pos, 0, $blank);
-        $city->latitude = substr($pos, $blank + 1);
-        if ($city->save() === true) {
+        return $responseData;
+    }
+    
+    /**
+     * Возвращает геоданные: долготу и широту локации
+     * @param string $name наименование локации
+     *
+     * @return array данные локации
+     */
+    public static function getGeoData(string $name): array
+    {
+        $city = City::findOne(['name' => $name]);
+        if ($city) {
             return [
                 'id' => $city->id,
-                'lon' => $city->longitude,
                 'lat' => $city->latitude,
+                'lon' => $city->longitude,
             ];
         }
-        return null;
+        $data = [
+            'id' => 0,
+            'lat' => 0,
+            'lon' => 0,
+        ];
+        try {
+            $responseData = self::getApiRequest($name);
+            $featureMember = $responseData['response']['GeoObjectCollection']['featureMember'];
+            $pos = $featureMember[0]['GeoObject']['Point']['pos'];
+            $blank = strpos($pos, ' ');
+            $city = new City();
+            $city->name = $city;
+            $city->longitude = substr($pos, 0, $blank);
+            $city->latitude = substr($pos, $blank + 1);
+            if ($city->save() === true) {
+                $data['id'] = $city->id;
+                $data['lon'] = $city->longitude;
+                $data['lat'] = $city->latitude;
+            }
+        } catch (Exception $e) {
+        }
+        return $data;
     }
 
     /**

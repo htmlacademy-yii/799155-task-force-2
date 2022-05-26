@@ -42,7 +42,7 @@ class TasksSelector extends Task
     {
         $message = 'Поле не может быть пустым';
         return [
-            [['name', 'category', 'address'], 'required', 'message' => $message],
+            [['name', 'category'], 'required', 'message' => $message],
             [['description', 'city', 'district', 'street', 'status'], 'string'],
             [['description', 'name', 'budget', 'deadline'], 'safe'],
             [['category', 'files', 'address', 'status', 'city', 'street'], 'safe'],
@@ -133,7 +133,6 @@ class TasksSelector extends Task
         return true;
     }
 
-
     /**
      * Сохраняет задание в БД
      * @return bool результат операции соохранения в БД
@@ -158,6 +157,64 @@ class TasksSelector extends Task
             $this->delete();
         }
         return false;
+    }
+
+    private static function getQueryWithoutLocation(&$query)
+    {
+        //удаленная работа
+        $query = (new Query())->select(
+            [
+                'tasks.id',
+                'cat_id',
+                'tasks.custom_id',
+                'tasks.contr_id',
+                'tasks.add_date',
+                'tasks.status',
+                'city_id'
+            ]
+        )->from('tasks')->
+        leftJoin('locations l', 'tasks.id = l.task_id')->where(['city_id' => null]);
+    }
+
+    private static function getQueryWithoutReviews(&$query)
+    {
+        //без откликов исполнителей
+        if ($query === null) {
+            $query = (new Query())->select(['tasks.id', 'reviews'])->from('tasks')->
+                leftJoin('replies r', 'tasks.id = r.task_id')->where(['reviews' => null]);
+        } else {
+            $query = $query->select(['reviews'])->
+                leftJoin('replies r', 'tasks.id = r.task_id')->where(['reviews' => null]);
+        }
+    }
+
+    private static function addOtherQueries(&$query, $userId, $statuses, $period, $catIds)
+    {
+        if ($query === null) {
+            $query = (new Query())->select(
+                [
+                    'id',
+                    'cat_id',
+                    'custom_id',
+                    'contr_id',
+                    'add_date',
+                    'status',
+                ]
+            )->from('tasks');
+        }
+        if ($userId > 0) {
+            $query = $query->andWhere(['or' , ['tasks.custom_id' => $userId], ['tasks.contr_id' => $userId]]);
+        }
+        $query = $query->andWhere(['in' , 'tasks.status', $statuses]);
+        if ($catIds !== Categories::CATEGORIES_NOT_SELECTED) {
+            $query = $query->andWhere(['in', 'cat_id', $catIds]);
+        };
+        if (strlen($period) > 0) {
+            $hours = array_keys(self::TIME_PERIODS);
+            $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
+            $query = $query->andWhere(['>', 'tasks.add_date', "$date"]);
+        }
+        $query = $query->orderBy(['tasks.add_date' => SORT_DESC]);
     }
 
     /**
@@ -195,53 +252,12 @@ class TasksSelector extends Task
         }
         $query = null;
         if ($remoteTaskCondition !== Categories::NO_ADDITION_SELECTED) {
-            $query = (new Query())->select(
-                [
-                    'tasks.id',
-                    'cat_id',
-                    'tasks.custom_id',
-                    'tasks.contr_id',
-                    'tasks.add_date',
-                    'tasks.status',
-                    'city_id'
-                ]
-            )->from('tasks')->
-            leftJoin('locations l', 'tasks.id = l.task_id')->where(['city_id' => null]);
+            self::getQueryWithoutLocation($query);
         }
         if ($additionalCondition !== Categories::NO_ADDITION_SELECTED) {
-            if ($query === null) {
-                $query = (new Query())->select(['tasks.id', 'reviews'])->from('tasks')->
-                    leftJoin('replies r', 'tasks.id = r.task_id')->where(['reviews' => null]);
-            } else {
-                $query = $query->select(['reviews'])->
-                    leftJoin('replies r', 'tasks.id = r.task_id')->where(['reviews' => null]);
-            }
+            self::getQueryWithoutReviews($query);
         }
-        if ($query === null) {
-            $query = (new Query())->select(
-                [
-                    'id',
-                    'cat_id',
-                    'custom_id',
-                    'contr_id',
-                    'add_date',
-                    'status',
-                ]
-            )->from('tasks');
-        }
-        if ($userId > 0) {
-            $query = $query->andWhere(['or' , ['tasks.custom_id' => $userId], ['tasks.contr_id' => $userId]]);
-        }
-        $query = $query->andWhere(['in' , 'tasks.status', $statuses]);
-        if ($selectedCategoriesId !== Categories::CATEGORIES_NOT_SELECTED) {
-            $query = $query->andWhere(['in', 'cat_id', $selectedCategoriesId]);
-        };
-        if (strlen($period) > 0) {
-            $hours = array_keys(self::TIME_PERIODS);
-            $date = date("Y-m-d H:i:s", time() - 3600 * $hours[$period]);
-            $query = $query->andWhere(['>', 'tasks.add_date', "$date"]);
-        }
-        $query = $query->orderBy(['tasks.add_date' => SORT_DESC]);
+        self::addOtherQueries($query, $userId, $statuses, $period, $selectedCategoriesId);
         $countQuery = clone $query;
         $pages->totalCount = count($countQuery->all());
         $pages->forcePageParam = false;
