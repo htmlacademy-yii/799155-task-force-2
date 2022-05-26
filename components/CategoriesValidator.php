@@ -23,7 +23,6 @@ class CategoriesValidator extends Validator
     {
         if ($model->categoriesCheckArray === Categories::CATEGORIES_NOT_SELECTED) {
             $this->addError($model, $attribute, 'Не выбраны категории специализаций!');
-            return;
         }
     }
 }

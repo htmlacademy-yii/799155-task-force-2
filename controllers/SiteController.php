@@ -50,11 +50,15 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $auth = Yii::$app->getSession()['registration'];
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (isset($_POST['modal_photo']) and $_POST['modal_photo'] === 'on') {
+        if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->post('modal_photo') !== null &&
+                Yii::$app->request->post('modal_photo') === 'on'
+            ) {
                 Client::loadPhoto();
             }
-            if (isset($_POST['modal_zakaz']) and $_POST['modal_zakaz'] === 'on') {
+            if (Yii::$app->request->post('modal_zakaz') !== null &&
+                Yii::$app->request->post('modal_zakaz') === 'on'
+            ) {
                 $user = User::findIdentity(Yii::$app->user->getId());
                 $user->contractor = 1;
                 $user->update(false, ['contractor']);

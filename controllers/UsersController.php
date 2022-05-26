@@ -51,10 +51,8 @@ class UsersController extends SecuredController
         if (Yii::$app->request->isPost) {
             if (Yii::$app->request->post('modal') === 'file') {
                 $avatar->file = UploadedFile::getInstance($avatar, 'file');
-                if ($avatar->validate()) {
-                    if ($avatar->updateProfile($prof, $user)) {
-                        return $this->refresh();
-                    }
+                if ($avatar->validate() and $avatar->updateProfile($prof, $user)) {
+                    return $this->refresh();
                 }
             }
             if (Yii::$app->request->post('form') === 'save') {

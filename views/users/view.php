@@ -43,7 +43,7 @@ $age = Yii::$app->helpers->getAge($user->born_date);
         </p>
     </div>
     <div class="specialization-bio">
-        <div class="specialization">
+        <div class="feedback-wrapper">
             <p class="head-info">Специализации</p>
             <ul class="special-list">
                 <?php foreach ($user->categories as $category) :?>
@@ -54,7 +54,7 @@ $age = Yii::$app->helpers->getAge($user->born_date);
                 <?php endforeach; ?>
             </ul>
         </div>
-        <div class="bio">
+        <div class="feedback-wrapper">
             <p class="head-info">Био</p>
             <p class="bio-info">
                 <span class="country-info">Россия</span>,

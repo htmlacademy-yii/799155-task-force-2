@@ -285,7 +285,6 @@ class TasksController extends SecuredController
             throw new NotFoundHttpException('Страница для ' . $code . ' не найдена');
         }
         $contr = $this->user->contractor;
-        $contr = $this->user->contractor;
         $pages = new Pagination();
         $pages->pageSize = TasksSelector::TASKS_PER_PAGE;
         $tasks = TasksSelector::selectTasksByStatus(

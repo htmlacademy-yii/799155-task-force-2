@@ -70,6 +70,27 @@ foreach ($replies as $reply) {
 </head>
 <?php endif;?>
 
+<style>
+.response-message {
+  width: 316px;
+  font-size: 16px;
+  margin-top: 5px;
+  margin-bottom: auto; }
+.response-card:hover .button-popup,
+.button-popup:hover {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  position: absolute;
+  content: "";
+  top: 22px;
+  right: -45px; }
+</style>
+
 <div class="left-column">
     <div class="head-wrapper">
         <h3 class="head-main"><?=Html::encode($task->name) . ' (' . Task::TASK_DESCR[$task->status] . ')'?></h3>
@@ -202,8 +223,8 @@ foreach ($replies as $reply) {
                 <!-- если активный пользователь - заказчик, рисуем для него кнопки -->
                 <?php if ($task->custom_id === $user->id and $reply->status === Reply::STATUS_PROPOSAL) :?>
                     <div class="button-popup">
-                        <a href=<?='/accept/' . $reply->id?> class="button blue-button">Принять</a>
-                        <a href=<?='/reject/' . $reply->id?> class="button orange-button">Отказать</a>
+                        <a href=<?='/accept/' . $reply->id?> class="button button--blue">Принять</a>
+                        <a href=<?='/reject/' . $reply->id?> class="button button--orange">Отказать</a>
                     </div>
                 <?php endif;?>
             </div>
