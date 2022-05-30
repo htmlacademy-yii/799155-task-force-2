@@ -58,7 +58,7 @@ $user = Yii::$app->helpers->checkAuthorization();
         <div class="form-group">
             <p class="form-label">Аватар</p>
             <?php if ($model->avatar !== null) :?>
-                <img src=<?=$model->avatar?> width="83" height="83">
+                <img src=<?=Html::encode($model->avatar)?> width="83" height="83">
             <?php else :?>
                 <img src=<?=ProfileFile::AVATAR_ANONIM?> width="83" height="83">
             <?php endif;?>
@@ -71,14 +71,14 @@ $user = Yii::$app->helpers->checkAuthorization();
                     'tag' => 'button',
                     'class' => 'button button--black',
                 ],
-                'footer' => $user->name,
+                'footer' => Html::encode($user->name),
     ]);?>
         <?php $modal = ActiveForm::begin(
             ['id' => 'modal-form',],
             ['options' => ['enctype' => 'multipart/form-data']]
         );?>
         <?php if ($model->avatar !== null) :?>
-            <img src=<?=$model->avatar?> width="83" height="83">
+            <img src=<?=Html::encode($model->avatar)?> width="83" height="83">
         <?php else :?>
             <img src=<?=ProfileFile::AVATAR_ANONIM?> width="83" height="83">
         <?php endif;?>

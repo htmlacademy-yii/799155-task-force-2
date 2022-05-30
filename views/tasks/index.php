@@ -34,11 +34,12 @@ if (strstr(Url::current(), 'category') === false) {
 
 ?>
 <div class="left-column">
-    <h3 class="head-main head-task"><?=$title?></h3>
+    <h3 class="head-main head-task"><?=Html::encode($title)?></h3>
     <?php foreach ($tasks as $task) : ?>
     <div class="task-card">
         <div class="header-task">
-            <a  href=<?='/task/' . $task->id?> class="link link--block link--big"><?=Html::encode($task->name)?></a>
+            <a  href=<?='/task/' . Html::encode($task->id)?>
+                class="link link--block link--big"><?=Html::encode($task->name)?></a>
             <?php if (!empty($task->budget)) :?>
                 <p class="price price--task"><?=Html::encode($task->budget)?> ₽</p>
             <?php endif;?>
@@ -51,7 +52,8 @@ if (strstr(Url::current(), 'category') === false) {
         <div class="footer-task">
             <p class="info-text town-text"><?=Html::encode($task->city . ', ' . $task->street)?></p>
             <p class="info-text category-text"><?=Html::encode($task->category)?></p>
-            <a href=<?='/task/' . $task->id?> class="button button--black">Смотреть задание</a>
+            <a href=<?='/task/' . Html::encode($task->id)?>
+                class="button button--black">Смотреть задание</a>
         </div>
     </div>
     <?php endforeach; ?>
@@ -69,7 +71,8 @@ if (strstr(Url::current(), 'category') === false) {
                 </li>
             <?php endfor;?>
             <li class="pagination-item mark">
-                <a href=<?='/tasks/' . ($pages->getPage() < $pages->getPageCount() - 1 ? $pages->getPage() + 2 : '#')?>
+                <a href=<?='/tasks/' .
+                    ($pages->getPage() < $pages->getPageCount() - 1 ? $pages->getPage() + 2 : '#')?>
                     class="link link--page"></a>
             </li>
         </ul>

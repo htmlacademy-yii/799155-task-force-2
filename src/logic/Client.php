@@ -86,7 +86,7 @@ class Client
             Yii::$app->getSession()->setFlash('error', $message);
         }
     }
-    
+
     /**
      * Регистрация пользователя
      * @param User $user сущность
@@ -102,7 +102,7 @@ class Client
             $message .= ' уже существует';
             Yii::$app->getSession()->setFlash('info', $message);
             return false;
-        } 
+        }
         $geoData = null;
         if (!empty($this->city)) {
             $geoData = Location::getGeoData($this->city);
@@ -130,10 +130,10 @@ class Client
         }
         return true;
     }
-    
+
     /**
      * Создает профиль пользователя
-     * @param User $user данные регистрации пользователя 
+     * @param User $user данные регистрации пользователя
      * @return true|false результат создания профиля
      */
     private function createProfile($user): bool
@@ -158,8 +158,7 @@ class Client
         }
         return true;
     }
-    
-     
+
     /**
      * Производит авторизацию пользователя
      * через аккаунт ВКонтакте
@@ -182,12 +181,11 @@ class Client
             $model = new Logon();
             $model->logon($user, true);
             return;
-        } 
+        }
         //пользователь не зарегистрирован
         //регистрация пользователя
         $user = new User();
-        if ($this->registerUser($user))
-        {
+        if ($this->registerUser($user)) {
             $auth = Source::getSource($user, $this);
             if ($auth->save()) {
                 $model = new Logon();

@@ -93,7 +93,8 @@ foreach ($replies as $reply) {
 
 <div class="left-column">
     <div class="head-wrapper">
-        <h3 class="head-main"><?=Html::encode($task->name) . ' (' . Task::TASK_DESCR[$task->status] . ')'?></h3>
+        <h3 class="head-main"><?=Html::encode($task->name) .
+        ' (' . Html::encode(Task::TASK_DESCR[$task->status]) . ')'?></h3>
         <p class="price price--big"><?=empty($task->budget) ? '' : Html::encode($task->budget) . ' ₽'?></p>
     </div>
     <p class="task-description">
@@ -109,7 +110,7 @@ foreach ($replies as $reply) {
                         'tag' => 'button',
                         'class' => 'button button--blue',
                     ],
-                    'footer' => $task->name,
+                    'footer' => Html::encode($task->name),
                 ]);
             ?>
             <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
@@ -131,7 +132,7 @@ foreach ($replies as $reply) {
                         'tag' => 'button',
                         'class' => 'button button--blue',
                     ],
-                    'footer' => $task->name,
+                    'footer' => Html::encode($task->name),
                 ]);
             ?>
             <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
@@ -149,7 +150,8 @@ foreach ($replies as $reply) {
     <!-- Рисуем модальное окно для заказчика и формирования отзыва о работе -->
     <?php if ($user->id === $task->custom_id) :?>
         <?php if ($task->status === Task::STATUS_NEW) :?>
-            <a href="<?='/cancel/' . $task->id?>" class="button button--blue">Отменить задание</a>
+            <a href="<?='/cancel/' . Html::encode($task->id)?>"
+                class="button button--blue">Отменить задание</a>
         <?php elseif ($task->status === Task::STATUS_ON_DEAL) :?>
             <?php Modal::begin([
                     'title' => '<h2>Принять задание</h2>',
@@ -158,7 +160,7 @@ foreach ($replies as $reply) {
                         'tag' => 'button',
                         'class' => 'button button--blue',
                     ],
-                    'footer' => $task->name,
+                    'footer' => Html::encode($task->name),
                 ]);
             ?>
             <?php $form = ActiveForm::begin(['id' => 'modal-form']); ?>
@@ -190,8 +192,9 @@ foreach ($replies as $reply) {
                 <img class="customer-photo" src=<?=Url::to(Html::encode($reply->avatar), true);?>
                     width="146" height="156" alt="Фото заказчиков">
                 <div class="feedback-wrapper">
-                    <a href="<?='/user/' . $reply->contr_id?>" class="link link--block link--big">
-                        <?=$reply->contractor?>
+                    <a href="<?='/user/' . Html::encode($reply->contr_id)?>"
+                        class="link link--block link--big">
+                        <?=Html::encode($reply->contractor)?>
                     </a>
                     <div class="response-wrapper">
                         <div class="stars-rating small">
@@ -201,7 +204,7 @@ foreach ($replies as $reply) {
                             <?php endforeach; ?>
                         </div>
                         <p class="reviews">
-                            <?=$reply->reviews . ' ' .
+                            <?=Html::encode($reply->reviews) . ' ' .
                             Yii::$app->helpers->
                             getNounPluralForm(
                                 $reply->reviews,
@@ -211,20 +214,22 @@ foreach ($replies as $reply) {
                             );?></p>
                     </div>
                     <p class="response-message">
-                        <?=$reply->comment?>
+                        <?=Html::encode($reply->comment)?>
                     </p>
                 </div>
                 <div class="feedback-wrapper">
                     <p class="info-text"><span class="current-time">
                         <?=Yii::$app->helpers->getTimeStr(Html::encode($reply->add_date));?></span>
                     </p>
-                    <p class="price price--small"><?=$reply->price . ' ₽';?></p>
+                    <p class="price price--small"><?=Html::encode($reply->price) . ' ₽';?></p>
                 </div>
                 <!-- если активный пользователь - заказчик, рисуем для него кнопки -->
                 <?php if ($task->custom_id === $user->id and $reply->status === Reply::STATUS_PROPOSAL) :?>
                     <div class="button-popup">
-                        <a href=<?='/accept/' . $reply->id?> class="button button--blue">Принять</a>
-                        <a href=<?='/reject/' . $reply->id?> class="button button--orange">Отказать</a>
+                        <a href=<?='/accept/' . Html::encode($reply->id)?>
+                            class="button button--blue">Принять</a>
+                        <a href=<?='/reject/' . Html::encode($reply->id)?>
+                            class="button button--orange">Отказать</a>
                     </div>
                 <?php endif;?>
             </div>
@@ -237,7 +242,7 @@ foreach ($replies as $reply) {
         <dl class="black-list">
             <dt>Категория</dt>
             <dd>
-                <a href="<?='/category/' . $task->cat_id?>" class="link link--small">
+                <a href="<?='/category/' . Html::encode($task->cat_id) . '&1'?>" class="link link--small">
                     <?=Html::encode($task->category)?>
                 </a>
             </dd>
@@ -254,7 +259,7 @@ foreach ($replies as $reply) {
         <ul class="enumeration-list">
             <?php foreach ($docs as $doc) :?>
                 <li class="enumeration-item">
-                <a href=<?='/download/' . $doc->id;?>
+                <a href=<?='/download/' . Html::encode($doc->id);?>
                     class="link link--block link--clip">
                     <?=Yii::$app->helpers->shortenFileName($doc->doc);?></a>
                 <p class="file-size"><?=$doc->size?> Кб</p>

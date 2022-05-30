@@ -50,6 +50,7 @@ if (isset(Yii::$app->getSession()['registration'])) {
 <div class="table-layout">
     <header>
         <div class="main-container page-header__container page-header__container--index">
+            <?php if ($this->beginCache('page-header__logo--index', ['duration' => 3600])) :?>
             <div class="page-header__logo--index ">
                 <a>
                     <svg class="logo-image--index" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1634 646.35">
@@ -134,10 +135,12 @@ if (isset(Yii::$app->getSession()['registration'])) {
                             27.05Z" transform="translate(-5.5 -7.17)"/>
                         </g>
                     </g>
-                </svg>
-            </a>
+                    </svg>
+                </a>
                 <p>Работа там, где ты!</p>
             </div>
+                <?php $this->endCache();?>
+            <?php endif;?>
             <div class="header__account--index">
             <?php if (!$userIsAuthorized) :?>
                 <a href="/logon" class="header__account-enter open-modal" data-for="enter-form">
@@ -195,6 +198,7 @@ if (isset(Yii::$app->getSession()['registration'])) {
                <?=$userIsAuthorized ? '' :
                     Html::a('Создать аккаунт', ['/registration',], ['class' => 'button']);?>
            </div>
+           <?php if ($this->beginCache('landing-center', ['duration' => 3600])) :?>
            <div class="landing-center">
                <div class="landing-instruction">
                     <div class="landing-instruction-step">
@@ -275,6 +279,8 @@ if (isset(Yii::$app->getSession()['registration'])) {
                 </div>
                </div>
            </div>
+                <?php $this->endCache(); ?>
+           <?php endif;?>
            <div class="landing-bottom">
                <div class="landing-bottom-container">
                    <h2>Последние задания на сайте</h2>
@@ -282,17 +288,18 @@ if (isset(Yii::$app->getSession()['registration'])) {
                    <div class="landing-task">
                        <div class="landing-task-top task-<?=$task->code?>"></div>
                        <div class="landing-task-description">
-                           <h3><a href=<?='/task/' . $task->id?>
-                                class="link-regular"><?=$task->name?></a></h3>
-                           <p><?=substr($task->description, 0, 60) . ' ...'?></p>
+                           <h3><a href=<?='/task/' . Html::encode($task->id)?>
+                                class="link-regular"><?=Html::encode($task->name)?></a></h3>
+                           <p><?=Html::encode(substr($task->description, 0, 60)) . ' ...'?></p>
                        </div>
                        <div class="landing-task-info">
                            <div class="task-info-left">
-                               <p><a href=<?='/category/' . $task->cat_id . '&1'?> class="link-regular">
-                                    <?=$task->category?></a></p>
+                               <p><a href=<?='/category/' . Html::encode($task->cat_id) . '&1'?>
+                                    class="link-regular">
+                                    <?=Html::encode($task->category)?></a></p>
                                <p><?=Yii::$app->helpers->getTimeStr(Html::encode($task->add_date))?></p>
                            </div>
-                           <span><?=$task->budget?> <b>₽</b></span>
+                           <span><?=Html::encode($task->budget)?> <b>₽</b></span>
                        </div>
                    </div>
                    <?php endforeach;?>
@@ -305,6 +312,7 @@ if (isset(Yii::$app->getSession()['registration'])) {
     </main>
     <footer class="page-footer">
         <div class="main-container page-footer__container">
+            <?php if ($this->beginCache('page-footer__info', ['duration' => 3600])) :?>
             <div class="page-footer__info">
                 <p class="page-footer__info-copyright">
                     © 2022, ООО «ТаскФорс»
@@ -315,6 +323,8 @@ if (isset(Yii::$app->getSession()['registration'])) {
                     mail@taskforce.com
                 </p>
             </div>
+                <?php $this->endCache();?>
+            <?php  endif;?>
             <div class="page-footer__links">
                 <ul class="links__list">
                     <?php if ($userIsAuthorized) :?>
