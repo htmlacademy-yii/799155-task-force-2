@@ -102,7 +102,7 @@ class Location extends ActiveRecord
         }
         return $responseData;
     }
-    
+
     /**
      * Возвращает геоданные: долготу и широту локации
      * @param string $name наименование локации

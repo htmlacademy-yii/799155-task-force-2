@@ -27,7 +27,7 @@ $age = Yii::$app->helpers->getAge($user->born_date);
     <h3 class="head-main"><?=Html::encode($user->name)?></h3>
     <div class="user-card">
         <div class="photo-rate">
-            <img class="card-photo" src=<?=Url::to($user->avatar, true);?>
+            <img class="card-photo" src=<?=Url::to(Html::encode($user->avatar), true);?>
                 width="191" height="190" alt="Фото пользователя">
             <div class="card-rate">
                 <div class="stars-rating big">
@@ -35,11 +35,11 @@ $age = Yii::$app->helpers->getAge($user->born_date);
                         <?= $value ? '<span class="fill-star">&nbsp;</span>' : '<span>&nbsp;</span>'?>
                     <?php endforeach; ?>
                 </div>
-                <span class="current-rate"><?=$user->rating?></span>
+                <span class="current-rate"><?=Html::encode($user->rating)?></span>
             </div>
         </div>
         <p class="user-description">
-            <?=$user->about_info?>
+            <?=Html::encode($user->about_info)?>
         </p>
     </div>
     <div class="specialization-bio">
@@ -48,8 +48,8 @@ $age = Yii::$app->helpers->getAge($user->born_date);
             <ul class="special-list">
                 <?php foreach ($user->categories as $category) :?>
                     <li class="special-item">
-                        <a href=<?='/category/' . $category->id?>
-                            class="link link--regular"><?=$category->name?></a>
+                        <a href=<?='/category/' . Html::encode($category->id)?>
+                            class="link link--regular"><?=Html::encode($category->name)?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -58,9 +58,9 @@ $age = Yii::$app->helpers->getAge($user->born_date);
             <p class="head-info">Био</p>
             <p class="bio-info">
                 <span class="country-info">Россия</span>,
-                <span class="town-info"><?=$user->city?></span>
+                <span class="town-info"><?=Html::encode($user->city)?></span>
                 <?php if ($user->born_date !== null) :?>
-                <span class="age-info"><?=', ' . $age .
+                <span class="age-info"><?=', ' . Html::encode($age) .
                     Yii::$app->helpers->getNounPluralForm($age, ' год', ' года', ' лет')?></span>
                 <?php endif;?>
             </p>
@@ -69,12 +69,13 @@ $age = Yii::$app->helpers->getAge($user->born_date);
     <h4 class="head-regular" <?= count($reviews) ? '' : 'hidden';?>>Отзывы заказчиков</h4>
     <?php foreach ($reviews as $review) :?>
     <div class="response-card">
-        <img class="customer-photo" src=<?=Url::to($review->avatar, true);?>
+        <img class="customer-photo" src=<?=Url::to(Html::encode($review->avatar), true);?>
             width="120" height="127" alt="Фото заказчиков">
         <div class="feedback-wrapper">
-            <p class="feedback"><?=$review->comment?></p>
-            <p class="task">Задание «<a href=<?='/task/' . $review->task_id?> 
-                class="link link--small"><?=$review->name?></a>» <?=$review->status?>
+            <p class="feedback"><?=Html::encode($review->comment)?></p>
+            <p class="task">Задание «<a href=<?='/task/' . Html::encode($review->task_id)?> 
+                class="link link--small"><?=Html::encode($review->name)?></a>»
+                <?=Html::encode($review->status)?>
             </p>
         </div>
         <div class="feedback-wrapper">
@@ -99,13 +100,13 @@ $age = Yii::$app->helpers->getAge($user->born_date);
         <h4 class="head-card">Статистика исполнителя</h4>
         <dl class="black-list">
                 <dt>Всего заказов</dt>
-                <dd><?="выполнено: $user->doneCounter, провалено: $user->refuseCounter"?></dd>
+                <dd><?=Html::encode("выполнено: $user->doneCounter, провалено: $user->refuseCounter")?></dd>
                 <dt>Место в рейтинге</dt>
-                <dd><?=$user->position . ' место'?></dd>
+                <dd><?=Html::encode($user->position) . ' место'?></dd>
                 <dt>Дата регистрации</dt>
                 <dd><?=Yii::$app->helpers->ruDate(Html::encode($user->add_date))?></dd>
                 <dt>Статус</dt>
-                <dd><?=$user->status?></dd>
+                <dd><?=Html::encode($user->status)?></dd>
         </dl>
     </div>
     <?php if ($showContacts) :?>
@@ -114,15 +115,15 @@ $age = Yii::$app->helpers->getAge($user->born_date);
         <ul class="enumeration-list">
             <?php if ($user->phone) :?>
             <li class="enumeration-item">
-                <a href="#" class="link link--block link--phone"><?=$user->phone?></a>
+                <a href="#" class="link link--block link--phone"><?=Html::encode($user->phone)?></a>
             </li>
             <?php endif; ?>
             <li class="enumeration-item">
-                <a href="#" class="link link--block link--email"><?=$user->email?></a>
+                <a href="#" class="link link--block link--email"><?=Html::encode($user->email)?></a>
             </li>
             <?php if ($user->messenger) :?>
             <li class="enumeration-item">
-                <a href="#" class="link link--block link--tg"><?=$user->messenger?></a>
+                <a href="#" class="link link--block link--tg"><?=Html::encode($user->messenger)?></a>
             </li>
             <?php endif; ?>
         </ul>

@@ -14,17 +14,18 @@ $link = substr(Url::current(), 0, strpos(Url::current(), '&', -1) - 1);
         <?php foreach (Task::FILTER_LINKS[$contr] as $key => $value) :?>
         <li class="side-menu-item
             <?=strstr(Url::current(), $key) === false ? '' : 'side-menu-item--active';?>">
-            <a href=<?='/my-tasks/' . $key . '&1'?> class="link link--nav"><?=$value[0]?></a>
+            <a href=<?='/my-tasks/' . Html::encode($key) . '&1'?>
+                class="link link--nav"><?=Html::encode($value[0])?></a>
         </li>
         <?php endforeach;?>
     </ul>
 </div>
 <div class="left-column left-column--task">
-    <h3 class="head-main head-regular"><?=Task::FILTER_LINKS[$contr][$code][1]?></h3>
+    <h3 class="head-main head-regular"><?=Html::encode(Task::FILTER_LINKS[$contr][$code][1])?></h3>
     <?php foreach ($tasks as $task) :?>
     <div class="task-card">
             <div class="header-task">
-            <a href=<?='/task/' . $task->id?>
+            <a href=<?='/task/' . Html::encode($task->id)?>
                 class="link link--block link--big"><?=Html::encode($task->name)?></a>
             <p class="price price--task"><?=Html::encode($task->budget) . ' ₽'?></p>
         </div>
@@ -36,7 +37,7 @@ $link = substr(Url::current(), 0, strpos(Url::current(), '&', -1) - 1);
             <p class="info-text town-text"><?=Html::encode($task->city)?></p>
             <?php endif;?>
             <p class="info-text category-text"><?=Html::encode($task->category)?></p>
-            <a href=<?='/task/' . $task->id?> class="button button--black">Смотреть задание</a>
+            <a href=<?='/task/' . Html::encode($task->id)?> class="button button--black">Смотреть задание</a>
         </div>
     </div>
     <?php endforeach;?>

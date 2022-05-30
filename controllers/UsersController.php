@@ -21,6 +21,22 @@ use yii\web\Response;
 
 class UsersController extends SecuredController
 {
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => 'yii\filters\PageCache',
+                'only' => ['edit-profile'],
+                'duration' => 3600,
+                'dependency' => [
+                    'class' => 'yii\caching\DbDependency',
+                    'sql' => 'SELECT last_act FROM ' .
+                        Profile::tableName() . ' WHERE user_id = ' . Yii::$app->user->getId(),
+                ]
+            ]
+        ];
+    }
+
     public function actionView(int $id)
     {
         $user = UsersSelector::selectUser($id);

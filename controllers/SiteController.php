@@ -51,12 +51,14 @@ class SiteController extends Controller
     {
         $auth = Yii::$app->getSession()['registration'];
         if (Yii::$app->request->isPost) {
-            if (Yii::$app->request->post('modal_photo') !== null &&
+            if (
+                Yii::$app->request->post('modal_photo') !== null &&
                 Yii::$app->request->post('modal_photo') === 'on'
             ) {
                 Client::loadPhoto();
             }
-            if (Yii::$app->request->post('modal_zakaz') !== null &&
+            if (
+                Yii::$app->request->post('modal_zakaz') !== null &&
                 Yii::$app->request->post('modal_zakaz') === 'on'
             ) {
                 $user = User::findIdentity(Yii::$app->user->getId());

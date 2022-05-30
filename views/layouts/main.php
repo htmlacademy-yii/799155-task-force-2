@@ -160,12 +160,13 @@ input[type=date] {
                     width="55" height="55" alt="Аватар">
             </a>
             <div class="user-menu">
-                <p class="user-name"><?=$userName?></p>
+                <p class="user-name"><?=Html::encode($userName)?></p>
                 <div class="popup-head">
                     <ul class="popup-menu">
                         <?php if ($user !== null) :?>
                         <li class="menu-item">
-                            <a href=<?='/edit-profile/' . $user->id;?> class="link">Настройки</a>
+                            <a href=<?='/edit-profile/' . Html::encode($user->id);?>
+                                class="link">Настройки</a>
                         </li>
                         <?php endif;?>
                         <li class="menu-item">
